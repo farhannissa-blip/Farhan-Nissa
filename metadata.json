@@ -1,0 +1,6 @@
+{
+  "name": "Pandai Menangkap Ikan 3D - Perkalian 1 & 10",
+  "description": "Game edukasi interaktif 3D menangkap ikan Koi perkalian 1 dan 10 untuk siswa SDN 66 Banda Aceh dengan papan peringkat global.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

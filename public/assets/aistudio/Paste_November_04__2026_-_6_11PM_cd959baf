@@ -1,0 +1,1804 @@
+```html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pandai Menangkap Ikan Perkalian 1 dan 10 - SDN 66 Banda Aceh</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&display=swap');
+        
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            overflow: hidden; 
+            margin: 0; padding: 0; 
+            touch-action: none; 
+            user-select: none; 
+            -webkit-user-select: none; 
+            background-color: #0369a1;
+        }
+        .title-font { font-family: 'Fredoka One', cursive; }
+
+        /* ================= Bright Pond Background & Animations ================= */
+        .bright-pond-bg {
+            background: radial-gradient(circle at 50% 25%, #e0f2fe 0%, #38bdf8 40%, #0284c7 80%, #0c4a6e 100%);
+            position: relative;
+        }
+
+        .pond-pattern {
+            background-image: 
+                radial-gradient(rgba(255, 255, 255, 0.35) 2px, transparent 2px),
+                radial-gradient(rgba(186, 230, 253, 0.25) 1.5px, transparent 1.5px);
+            background-size: 36px 36px, 24px 24px;
+            background-position: 0 0, 12px 12px;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+        @keyframes floatReverse {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(8px) rotate(-2.5deg); }
+        }
+        .floating { animation: float 4.5s ease-in-out infinite; }
+        .floating-delayed { animation: floatReverse 5s ease-in-out infinite 1.5s; }
+
+        @keyframes shine {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer-gold-text {
+            background: linear-gradient(90deg, #b45309 0%, #d97706 20%, #fbbf24 50%, #d97706 80%, #b45309 100%);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shine 3.5s linear infinite;
+        }
+
+        /* ================= Glassmorphism Ultra Bright ================= */
+        .glass-bright {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 3px solid rgba(255, 255, 255, 0.98);
+            box-shadow: 0 25px 50px -12px rgba(3, 105, 161, 0.45), inset 0 0 25px rgba(255, 255, 255, 0.95);
+            border-radius: 2rem;
+        }
+
+        /* ================= Ultra Bright Interactive Pond Water ================= */
+        .game-pond-bg {
+            background: 
+                radial-gradient(circle at 50% 20%, rgba(186, 230, 253, 0.85) 0%, transparent 55%),
+                radial-gradient(circle at 80% 80%, rgba(14, 165, 233, 0.6) 0%, transparent 50%),
+                linear-gradient(180deg, #38bdf8 0%, #0284c7 60%, #0369a1 100%);
+            position: relative;
+            border: 6px solid #0284c7;
+            border-radius: 28px;
+            box-shadow: 
+                inset 0 0 50px rgba(3, 105, 161, 0.75), 
+                inset 0 6px 20px rgba(255, 255, 255, 0.5),
+                0 15px 35px rgba(12, 74, 110, 0.4),
+                0 0 0 4px #e0f2fe;
+            transition: box-shadow 0.3s ease;
+        }
+        
+        /* Animated Caustic Water Light Layers */
+        .game-pond-bg::before, .game-pond-bg::after {
+            content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: 22px;
+            mix-blend-mode: overlay;
+        }
+        
+        .game-pond-bg::before {
+            background-image: 
+                radial-gradient(circle at 25% 35%, rgba(255,255,255,0.9) 0%, transparent 45%),
+                radial-gradient(circle at 75% 65%, rgba(255,255,255,0.85) 0%, transparent 50%),
+                radial-gradient(circle at 60% 25%, rgba(255,255,255,0.7) 0%, transparent 40%);
+            background-size: 240px 240px;
+            animation: caustics1 9s infinite ease-in-out alternate;
+            opacity: 0.75;
+        }
+        
+        .game-pond-bg::after {
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.65) 0%, transparent 60%),
+                linear-gradient(125deg, rgba(255,255,255,0) 35%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0) 65%);
+            background-size: 280px 280px;
+            animation: caustics2 13s infinite ease-in-out alternate;
+            opacity: 0.7;
+        }
+        
+        @keyframes caustics1 { 
+            0% { background-position: 0 0; transform: scale(1); } 
+            100% { background-position: 100px 55px; transform: scale(1.08); } 
+        }
+        @keyframes caustics2 { 
+            0% { background-position: 0 0; transform: scale(1.08); } 
+            100% { background-position: -80px 95px; transform: scale(1); } 
+        }
+
+        /* Sunbeams overlay inside pond */
+        .sunbeams {
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                115deg,
+                rgba(255, 255, 255, 0.14) 0%,
+                rgba(255, 255, 255, 0.02) 12%,
+                transparent 24%
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Ambient Pond Bubbles */
+        .pond-bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            pointer-events: none;
+            z-index: 2;
+            animation: bubbleRise linear forwards;
+        }
+        @keyframes bubbleRise {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            20% { opacity: 0.85; }
+            80% { opacity: 0.75; }
+            100% { transform: translateY(-90px) scale(1.2); opacity: 0; }
+        }
+
+        /* HUD Panels */
+        .hud-pill {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(12px);
+            border: 2.5px solid #38bdf8;
+            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25), inset 0 0 10px rgba(255,255,255,0.9);
+            border-radius: 9999px;
+        }
+        .neon-box {
+            background: rgba(255, 255, 255, 0.95);
+            border: 3px solid #0284c7;
+            border-radius: 22px;
+            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.3), inset 0 0 15px rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        /* ================= Enhanced Fish Animations ================= */
+        .fish-entity { 
+            position: absolute; 
+            left: 0; top: 0;
+            cursor: pointer; 
+            will-change: transform;
+            z-index: 10;
+            touch-action: none;
+        }
+        .fish-entity:active {
+            filter: brightness(1.15);
+        }
+        .fish-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            animation: fishBob 1.8s infinite ease-in-out alternate;
+        }
+        @keyframes fishBob {
+            0% { transform: scaleY(0.97); }
+            100% { transform: scaleY(1.03); }
+        }
+
+        .fish-tail { transform-origin: 24px 28px; animation: wiggle 0.26s infinite alternate ease-in-out; }
+        .fish-fin-left { transform-origin: 48px 18px; animation: finWiggleLeft 0.38s infinite alternate ease-in-out; }
+        .fish-fin-right { transform-origin: 48px 38px; animation: finWiggleRight 0.38s infinite alternate ease-in-out; }
+        
+        @keyframes wiggle { 
+            0% { transform: rotate(-22deg) scaleX(0.95); } 
+            100% { transform: rotate(22deg) scaleX(1.05); } 
+        }
+        @keyframes finWiggleLeft { 
+            0% { transform: rotate(-14deg); } 
+            100% { transform: rotate(10deg); } 
+        }
+        @keyframes finWiggleRight { 
+            0% { transform: rotate(14deg); } 
+            100% { transform: rotate(-10deg); } 
+        }
+
+        /* Spawn Pop-in Animation */
+        @keyframes fishSpawnIn {
+            0% { opacity: 0; transform: scale(0.2); }
+            70% { opacity: 1; transform: scale(1.08); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .fish-spawn-anim {
+            animation: fishSpawnIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* Wake Ripple Behind Fish */
+        .fish-wake {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 1.5px solid rgba(255, 255, 255, 0.55);
+            pointer-events: none;
+            z-index: 4;
+            animation: wakeExpand 0.9s ease-out forwards;
+        }
+        @keyframes wakeExpand {
+            0% { transform: scale(0.5); opacity: 0.75; }
+            100% { transform: scale(2.8); opacity: 0; }
+        }
+
+        /* Interactive Water Ripple & Splash Effects */
+        .water-ripple {
+            position: absolute;
+            pointer-events: none;
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.85);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.6), inset 0 0 12px rgba(255, 255, 255, 0.6);
+            transform: scale(0.1);
+            z-index: 25;
+            animation: rippleOut 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .water-ripple-inner {
+            position: absolute;
+            inset: 14px;
+            border-radius: 50%;
+            border: 2px solid rgba(186, 230, 253, 0.9);
+        }
+        @keyframes rippleOut {
+            0% { transform: scale(0.15); opacity: 1; }
+            100% { transform: scale(1.85); opacity: 0; }
+        }
+
+        /* Floating Score Popup */
+        .floating-score {
+            position: absolute;
+            pointer-events: none;
+            z-index: 40;
+            font-family: 'Fredoka One', cursive;
+            text-shadow: 0 3px 0 rgba(0, 0, 0, 0.25), 0 0 12px rgba(255, 255, 255, 0.9);
+            animation: floatUpScore 0.95s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes floatUpScore {
+            0% { transform: translateY(10px) scale(0.4); opacity: 0; }
+            25% { transform: translateY(-8px) scale(1.15); opacity: 1; }
+            80% { transform: translateY(-32px) scale(1); opacity: 1; }
+            100% { transform: translateY(-48px) scale(0.85); opacity: 0; }
+        }
+
+        /* ================= Fishing Net Scoop Animation ================= */
+        .fishing-net-effect {
+            position: absolute;
+            width: 130px;
+            height: 130px;
+            pointer-events: none;
+            z-index: 35;
+            transform-origin: 85% 85%;
+            animation: netScoopAnim 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        @keyframes netScoopAnim {
+            0% {
+                transform: translate(30px, -45px) scale(1.35) rotate(40deg);
+                opacity: 0;
+            }
+            30% {
+                transform: translate(0px, 4px) scale(0.92) rotate(-12deg);
+                opacity: 1;
+            }
+            65% {
+                transform: translate(-6px, -18px) scale(1.12) rotate(8deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-18px, -40px) scale(0.85) rotate(22deg);
+                opacity: 0;
+            }
+        }
+
+        /* Water Splash Droplets */
+        .water-droplet {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50% 50% 50% 0;
+            background: radial-gradient(circle at 30% 30%, #ffffff, #7dd3fc);
+            box-shadow: 0 0 6px rgba(255, 255, 255, 0.9);
+            pointer-events: none;
+            z-index: 32;
+            animation: dropletFly 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes dropletFly {
+            0% {
+                transform: translate(0, 0) scale(0.5) rotate(45deg);
+                opacity: 1;
+            }
+            60% {
+                opacity: 0.95;
+            }
+            100% {
+                transform: translate(var(--dx), var(--dy)) scale(1.1) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        /* Flying Caught Fish Parabolic Jump to Bucket */
+        .flying-fish-clone {
+            position: fixed;
+            pointer-events: none;
+            z-index: 48;
+            width: 96px;
+            height: 50px;
+            will-change: transform, left, top;
+        }
+        .flying-fish-clone .fish-tail {
+            animation-duration: 0.1s !important;
+        }
+
+        /* Bucket Bounce */
+        @keyframes bucketBounce {
+            0% { transform: scale(1) rotate(0deg); }
+            30% { transform: scale(1.22, 0.85) rotate(-5deg); }
+            60% { transform: scale(0.92, 1.12) rotate(4deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        .bucket-jiggle {
+            animation: bucketBounce 0.45s ease-out;
+        }
+
+        /* Screen / Pond Shake on Mistake */
+        @keyframes pondShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px) rotate(-1deg); }
+            40% { transform: translateX(10px) rotate(1deg); }
+            60% { transform: translateX(-7px) rotate(-0.5deg); }
+            80% { transform: translateX(7px) rotate(0.5deg); }
+        }
+        .shake-error {
+            animation: pondShake 0.4s ease-in-out;
+        }
+
+        /* Question Pop Animation */
+        @keyframes questionPop {
+            0% { transform: scale(0.75); opacity: 0.5; }
+            60% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .question-pop-anim {
+            animation: questionPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .heart-beat { animation: heartbeat 0.85s infinite alternate ease-in-out; }
+        @keyframes heartbeat {
+            0% { transform: scale(1); filter: drop-shadow(0 0 2px #ef4444); }
+            100% { transform: scale(1.18); filter: drop-shadow(0 0 8px #ef4444); }
+        }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.15); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: linear-gradient(to bottom, #f59e0b, #0284c7); border-radius: 10px; }
+
+        /* Highlight Animasi Stabil & Ringan untuk Pemain Baru */
+        @keyframes recentGlow {
+            0%, 100% { 
+                box-shadow: 0 0 10px rgba(56, 189, 248, 0.5); 
+                border-color: #38bdf8;
+                background-color: rgba(255, 255, 255, 0.95);
+            }
+            50% { 
+                box-shadow: 0 0 20px rgba(245, 158, 11, 0.85); 
+                border-color: #f59e0b;
+                background-color: rgba(254, 252, 232, 1);
+            }
+        }
+        .recent-player-highlight {
+            animation: recentGlow 2s infinite ease-in-out;
+        }
+
+        @keyframes pulseBadge {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        .badge-pulse {
+            animation: pulseBadge 1.2s infinite ease-in-out;
+        }
+
+        /* Confetti Particle */
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 16px;
+            border-radius: 3px;
+            pointer-events: none;
+            z-index: 60;
+            animation: confettiFall 2.6s ease-in forwards;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(85vh) rotate(720deg); opacity: 0; }
+        }
+    </style>
+
+    <!-- Firebase SDK v10.12.0 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, query, orderByChild, limitToLast } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+        // CONFIG FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyBw05_xEySpFDIt5ZOXoZ82leQWwbNBVNw",
+            authDomain: "program-77646.firebaseapp.com",
+            databaseURL: "https://program-77646-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "program-77646",
+            storageBucket: "program-77646.firebasestorage.app",
+            messagingSenderId: "968369993846",
+            appId: "1:968369993846:web:781f564ced2ac358100757",
+            measurementId: "G-LHPNFLMV1L"
+        };
+
+        window.firebaseDB = null;
+        try {
+            if (firebaseConfig.apiKey && firebaseConfig.apiKey.trim() !== "") {
+                const app = initializeApp(firebaseConfig);
+                window.firebaseDB = getDatabase(app);
+            }
+        } catch (e) { 
+            console.error("Firebase skip:", e); 
+        }
+
+        // Dapatkan ID Perangkat Unik
+        window.getDeviceId = function() {
+            let deviceId = localStorage.getItem('game_device_id');
+            if (!deviceId) {
+                deviceId = 'dev_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+                localStorage.setItem('game_device_id', deviceId);
+            }
+            return deviceId;
+        };
+
+        // Fungsi Pembersihan & Penyaringan Data
+        window.sanitizeName = function(name) {
+            if (!name) return "Pemain Bintang";
+            const s = String(name).trim();
+            if (s === "" || s.toLowerCase() === "undefined" || s.toLowerCase() === "null") {
+                return "Pemain Bintang";
+            }
+            return s;
+        };
+
+        window.sanitizeSekolah = function(sekolah) {
+            if (!sekolah) return "SDN 66 Banda Aceh";
+            const s = String(sekolah).trim();
+            if (s === "" || s.toLowerCase() === "undefined" || s.toLowerCase() === "null") {
+                return "SDN 66 Banda Aceh";
+            }
+            return s;
+        };
+
+        window.sanitizeKelas = function(kelas) {
+            if (!kelas) return "-";
+            const s = String(kelas).trim();
+            if (s === "" || s.toLowerCase() === "undefined" || s.toLowerCase() === "null") {
+                return "-";
+            }
+            return s;
+        };
+
+        window.filterUniqueDeviceScores = function(list) {
+            if (!Array.isArray(list)) return [];
+            const deviceMap = new Map();
+            
+            const validList = list.filter(item => item && typeof item === 'object' && item.skor !== undefined && item.skor !== null && !isNaN(Number(item.skor)));
+            const sorted = validList.sort((a, b) => Number(b.skor) - Number(a.skor) || (a.waktu || 0) - (b.waktu || 0));
+            
+            sorted.forEach(item => {
+                const cleanName = window.sanitizeName(item.nama);
+                const cleanSekolah = window.sanitizeSekolah(item.sekolah);
+                const cleanKelas = window.sanitizeKelas(item.kelas);
+                
+                item.nama = cleanName;
+                item.sekolah = cleanSekolah;
+                item.kelas = cleanKelas;
+
+                const devId = item.device_id || (cleanName + '_' + cleanSekolah);
+                if (!deviceMap.has(devId)) {
+                    deviceMap.set(devId, item);
+                }
+            });
+            return Array.from(deviceMap.values()).sort((a, b) => Number(b.skor) - Number(a.skor));
+        };
+
+        window.simpanSkorGlobal = function(nama, sekolah, kelas, skor) {
+            const device_id = window.getDeviceId();
+            const cleanNama = window.sanitizeName(nama);
+            const cleanSekolah = window.sanitizeSekolah(sekolah);
+            const cleanKelas = window.sanitizeKelas(kelas);
+
+            const entry = { 
+                device_id, 
+                nama: cleanNama, 
+                sekolah: cleanSekolah, 
+                kelas: cleanKelas, 
+                skor: Number(skor), 
+                waktu: Date.now() 
+            };
+            
+            if (window.firebaseDB) {
+                push(ref(window.firebaseDB, 'leaderboard'), entry);
+            } else {
+                let lb = JSON.parse(localStorage.getItem('lb_ikan') || '[]');
+                lb.push(entry); 
+                localStorage.setItem('lb_ikan', JSON.stringify(lb));
+            }
+        };
+
+        window.pantauLeaderboard = function(updateUI) {
+            if (window.firebaseDB) {
+                const q = query(ref(window.firebaseDB, 'leaderboard'), orderByChild('skor'), limitToLast(200));
+                onValue(q, (snapshot) => {
+                    let data = [];
+                    snapshot.forEach((child) => { data.push(child.val()); });
+                    const filtered = window.filterUniqueDeviceScores(data);
+                    updateUI(filtered.slice(0, 100));
+                });
+            } else {
+                let lb = JSON.parse(localStorage.getItem('lb_ikan') || '[]');
+                const filtered = window.filterUniqueDeviceScores(lb);
+                updateUI(filtered.slice(0, 100));
+            }
+        };
+    </script>
+</head>
+<body class="w-screen h-screen relative flex flex-col bg-sky-600 overflow-hidden text-slate-900">
+
+    <!-- UPGRADED AUDIO ENGINE -->
+    <script>
+        let audioCtx;
+        let bgmTimer = null;
+        let bgmStep = 0;
+        let bgmIsPlaying = false;
+        let isAudioInit = false;
+        window.audioMuted = false;
+
+        // Melodi ceria bergaya Marimba Tropis
+        const melodyNotes = [
+            523.25, 659.25, 783.99, 1046.50, 880.00, 783.99, 659.25, 523.25,
+            587.33, 698.46, 880.00, 783.99, 659.25, 587.33, 523.25, 587.33,
+            523.25, 659.25, 783.99, 1046.50, 880.00, 1046.50, 783.99, 659.25,
+            698.46, 783.99, 880.00, 783.99, 587.33, 659.25, 523.25, 0
+        ];
+        const bassNotes = [
+            261.63, 0, 329.63, 0, 349.23, 0, 392.00, 0,
+            293.66, 0, 392.00, 0, 261.63, 0, 392.00, 0,
+            261.63, 0, 329.63, 0, 349.23, 0, 392.00, 0,
+            349.23, 0, 392.00, 0, 261.63, 0, 261.63, 0
+        ];
+
+        function initAudio() {
+            if (!isAudioInit) {
+                try { 
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+                    isAudioInit = true; 
+                } catch(e) {}
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playBgmStep() {
+            if (!audioCtx || window.audioMuted || !bgmIsPlaying) return;
+            const t = audioCtx.currentTime;
+            
+            const freq = melodyNotes[bgmStep % melodyNotes.length];
+            if (freq > 0) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, t);
+                gain.gain.setValueAtTime(0.045, t);
+                gain.gain.exponentialRampToValueAtTime(0.001, t + 0.19);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(t); osc.stop(t + 0.2);
+            }
+
+            const bFreq = bassNotes[bgmStep % bassNotes.length];
+            if (bFreq > 0) {
+                const bOsc = audioCtx.createOscillator();
+                const bGain = audioCtx.createGain();
+                bOsc.type = 'triangle';
+                bOsc.frequency.setValueAtTime(bFreq, t);
+                bGain.gain.setValueAtTime(0.035, t);
+                bGain.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+                bOsc.connect(bGain); bGain.connect(audioCtx.destination);
+                bOsc.start(t); bOsc.stop(t + 0.24);
+            }
+            bgmStep++;
+        }
+
+        function startBGM() {
+            if (!audioCtx || window.audioMuted || bgmIsPlaying) return;
+            bgmIsPlaying = true;
+            if (bgmTimer) clearInterval(bgmTimer);
+            bgmTimer = setInterval(playBgmStep, 210);
+        }
+
+        function stopBGM() {
+            bgmIsPlaying = false;
+            if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; }
+        }
+
+        function playWaterRippleSound() {
+            if (!audioCtx || window.audioMuted) return;
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(320, t);
+            osc.frequency.exponentialRampToValueAtTime(640, t + 0.09);
+            gain.gain.setValueAtTime(0.12, t);
+            gain.gain.exponentialRampToValueAtTime(0.005, t + 0.1);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(t); osc.stop(t + 0.11);
+        }
+
+        function playFishJumpSound() {
+            if (!audioCtx || window.audioMuted) return;
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(280, t);
+            osc.frequency.exponentialRampToValueAtTime(520, t + 0.08);
+            osc.frequency.exponentialRampToValueAtTime(240, t + 0.16);
+            gain.gain.setValueAtTime(0.08, t);
+            gain.gain.exponentialRampToValueAtTime(0.004, t + 0.17);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(t); osc.stop(t + 0.18);
+        }
+
+        function playCatchSound(comboCount = 1) {
+            if (!audioCtx || window.audioMuted) return;
+            const t = audioCtx.currentTime;
+            
+            // Suara percikan air (Water Splash)
+            const bufferSize = audioCtx.sampleRate * 0.14;
+            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+            
+            const noise = audioCtx.createBufferSource(); noise.buffer = buffer;
+            const noiseFilter = audioCtx.createBiquadFilter();
+            noiseFilter.type = 'bandpass'; noiseFilter.frequency.value = 950;
+            const noiseGain = audioCtx.createGain();
+            noiseGain.gain.setValueAtTime(0.25, t); noiseGain.gain.exponentialRampToValueAtTime(0.01, t + 0.14);
+            noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(audioCtx.destination);
+            noise.start(t);
+
+            // Suara Plop Air
+            const plop = audioCtx.createOscillator(); const plopGain = audioCtx.createGain();
+            plop.type = 'sine';
+            plop.frequency.setValueAtTime(420, t); plop.frequency.exponentialRampToValueAtTime(880, t + 0.09);
+            plopGain.gain.setValueAtTime(0.35, t); plopGain.gain.exponentialRampToValueAtTime(0.01, t + 0.1);
+            plop.connect(plopGain); plopGain.connect(audioCtx.destination);
+            plop.start(t); plop.stop(t + 0.11);
+
+            // Chime Kemenangan (Naik nada sesuai combo)
+            const pitchBoost = Math.min(comboCount - 1, 6) * 45;
+            const chime = audioCtx.createOscillator(); const chimeGain = audioCtx.createGain();
+            chime.type = 'triangle';
+            chime.frequency.setValueAtTime(587.33 + pitchBoost, t + 0.06); 
+            chime.frequency.setValueAtTime(880.00 + pitchBoost, t + 0.14);
+            chimeGain.gain.setValueAtTime(0.001, t + 0.06); 
+            chimeGain.gain.linearRampToValueAtTime(0.18, t + 0.1);
+            chimeGain.gain.exponentialRampToValueAtTime(0.005, t + 0.38);
+            chime.connect(chimeGain); chimeGain.connect(audioCtx.destination);
+            chime.start(t + 0.06); chime.stop(t + 0.4);
+        }
+
+        function playLevelUpSound() {
+            if (!audioCtx || window.audioMuted) return;
+            const t = audioCtx.currentTime;
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, idx) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, t + idx * 0.08);
+                gain.gain.setValueAtTime(0.16, t + idx * 0.08);
+                gain.gain.exponentialRampToValueAtTime(0.005, t + idx * 0.08 + 0.28);
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                osc.start(t + idx * 0.08); osc.stop(t + idx * 0.08 + 0.3);
+            });
+        }
+
+        function playWrongSound() {
+            if (!audioCtx || window.audioMuted) return;
+            const t = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(280, t); 
+            osc.frequency.exponentialRampToValueAtTime(125, t + 0.35);
+            gain.gain.setValueAtTime(0.01, t); 
+            gain.gain.linearRampToValueAtTime(0.16, t + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.005, t + 0.38);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(t); osc.stop(t + 0.4);
+        }
+
+        function toggleAudio() {
+            initAudio();
+            window.audioMuted = !window.audioMuted;
+            const btn = document.getElementById('audio-icon');
+            if (window.audioMuted) {
+                stopBGM();
+                btn.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" /><line x1="3" y1="3" x2="21" y2="21" stroke="#ef4444" stroke-width="2.5"/>`;
+            } else {
+                if (isPlaying && !isPaused) startBGM();
+                btn.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />`;
+            }
+        }
+    </script>
+
+    <!-- ================= START SCREEN ================= -->
+    <div id="start-screen" class="absolute inset-0 z-50 flex flex-col items-center justify-center bright-pond-bg pond-pattern p-4 overflow-y-auto">
+        <!-- Decorative Lotus & Lily Pads -->
+        <svg class="absolute top-3 left-3 w-28 h-28 md:w-36 md:h-36 opacity-90 pointer-events-none floating" viewBox="0 0 100 100">
+            <circle cx="52" cy="54" r="40" fill="rgba(3,105,161,0.25)"/>
+            <path d="M50,12 C80,12 92,36 88,64 C84,88 55,92 44,88 C16,78 10,45 25,22 C35,12 42,12 50,12 Z" fill="#22c55e" stroke="#15803d" stroke-width="3"/>
+            <path d="M50,12 L50,52 M50,52 L25,30 M50,52 L75,35 M50,52 L65,75 M50,52 L30,68" stroke="#166534" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <!-- Blooming Lotus -->
+            <g transform="translate(68, 30)">
+                <ellipse cx="0" cy="0" rx="14" ry="8" fill="#f43f5e" transform="rotate(15)"/>
+                <ellipse cx="0" cy="0" rx="14" ry="8" fill="#fb7185" transform="rotate(-35)"/>
+                <ellipse cx="0" cy="0" rx="12" ry="7" fill="#fda4af" transform="rotate(65)"/>
+                <circle cx="0" cy="0" r="5" fill="#fef08a"/>
+            </g>
+        </svg>
+
+        <svg class="absolute bottom-4 right-4 w-32 h-32 md:w-44 md:h-44 opacity-90 pointer-events-none floating-delayed" viewBox="0 0 100 100">
+            <circle cx="52" cy="54" r="40" fill="rgba(3,105,161,0.25)"/>
+            <path d="M50,10 C80,10 95,35 90,65 C85,90 55,95 45,90 C15,80 10,45 25,20 C35,10 42,10 50,10 Z" fill="#16a34a" stroke="#14532d" stroke-width="3"/>
+            <path d="M50,10 L50,52 M50,52 L26,32 M50,52 L74,36 M50,52 L62,74" stroke="#14532d" stroke-width="2" stroke-linecap="round" fill="none"/>
+            <g transform="translate(42, 46)">
+                <ellipse cx="0" cy="0" rx="15" ry="9" fill="#ec4899" transform="rotate(-15)"/>
+                <ellipse cx="0" cy="0" rx="15" ry="9" fill="#f472b6" transform="rotate(40)"/>
+                <ellipse cx="0" cy="0" rx="13" ry="8" fill="#fbcfe8" transform="rotate(95)"/>
+                <circle cx="0" cy="0" r="6" fill="#fde047"/>
+            </g>
+        </svg>
+
+        <div class="glass-bright p-6 md:p-8 text-center w-full max-w-md mx-auto relative overflow-hidden my-auto">
+            <div class="inline-flex items-center gap-1.5 bg-amber-400/30 px-4 py-1 rounded-full border border-amber-500/50 mb-2 shadow-sm">
+                <span class="text-sm">🏫</span>
+                <span class="text-amber-900 font-extrabold text-xs uppercase tracking-widest">SDN 66 BANDA ACEH</span>
+            </div>
+            <h1 class="title-font text-2xl md:text-4xl text-sky-950 mb-1 drop-shadow-sm leading-tight floating">
+                Pandai Menangkap Ikan<br>
+                <span class="shimmer-gold-text text-xl md:text-3xl">Perkalian 1 & 10</span>
+            </h1>
+            
+            <!-- Animated Hero Koi Illustration -->
+            <div class="relative w-36 h-24 mx-auto my-2 flex items-center justify-center">
+                <div class="absolute w-24 h-24 rounded-full border-2 border-sky-300/60 animate-ping opacity-40"></div>
+                <svg class="w-32 h-20 floating-delayed drop-shadow-lg" viewBox="0 0 110 56">
+                    <!-- Shadow -->
+                    <ellipse cx="58" cy="36" rx="34" ry="11" fill="rgba(2, 132, 199, 0.22)"/>
+                    <!-- Fins -->
+                    <path class="fish-fin-left" d="M48,18 Q38,2 56,4 Q62,12 52,20 Z" fill="#fb923c" opacity="0.95"/>
+                    <path class="fish-fin-right" d="M48,38 Q38,54 56,52 Q62,44 52,36 Z" fill="#fb923c" opacity="0.95"/>
+                    <!-- Tail -->
+                    <path class="fish-tail" d="M26,28 L4,10 Q14,28 4,46 Z" fill="#ea580c"/>
+                    <!-- Koi Body -->
+                    <path d="M22,28 Q45,6 82,20 Q100,28 96,28 Q100,28 82,36 Q45,50 22,28 Z" fill="#ffffff" stroke="#fed7aa" stroke-width="1"/>
+                    <!-- Koi Spots -->
+                    <path d="M38,21 Q52,12 66,22 Q54,32 38,21 Z" fill="#f97316"/>
+                    <circle cx="72" cy="30" r="6" fill="#ea580c"/>
+                    <!-- Dorsal Fin -->
+                    <path d="M46,26 Q60,22 70,27" stroke="#f97316" stroke-width="3" stroke-linecap="round" fill="none"/>
+                    <!-- Eyes -->
+                    <circle cx="86" cy="22" r="2.8" fill="#0f172a"/>
+                    <circle cx="87" cy="21" r="1" fill="#ffffff"/>
+                    <circle cx="86" cy="34" r="2.8" fill="#0f172a"/>
+                    <circle cx="87" cy="33" r="1" fill="#ffffff"/>
+                </svg>
+            </div>
+
+            <div id="form-error" class="hidden mb-3 p-2.5 bg-rose-500/20 border-2 border-rose-500 rounded-xl animate-bounce">
+                <p class="text-rose-700 font-extrabold text-xs">⚠️ Mohon isi Nama dan Kelas terlebih dahulu!</p>
+            </div>
+
+            <div class="flex flex-col gap-2.5 mb-5">
+                <input type="text" id="reg-nama" placeholder="Ketik Nama Pemain..." class="w-full px-4 py-3 rounded-2xl bg-white/95 text-sky-950 border-2 border-sky-300 focus:border-amber-500 outline-none text-center font-extrabold text-base shadow-inner placeholder-sky-400 transition">
+                <input type="text" id="reg-sekolah" value="SDN 66 Banda Aceh" class="w-full px-4 py-2.5 rounded-2xl bg-sky-50/95 text-sky-900 border-2 border-sky-300 focus:border-amber-500 outline-none text-center font-bold text-sm shadow-inner transition">
+                <input type="text" id="reg-kelas" placeholder="Kelas (Contoh: 2A / 3B)" class="w-full px-4 py-3 rounded-2xl bg-white/95 text-sky-950 border-2 border-sky-300 focus:border-amber-500 outline-none text-center font-extrabold text-base shadow-inner placeholder-sky-400 transition">
+            </div>
+
+            <!-- Diperbaiki: Menggunakan pointerdown agar responsif di HP/tablet dan desktop -->
+            <button id="start-btn" type="button" class="w-full bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-400 text-slate-950 font-black py-3.5 rounded-2xl text-lg shadow-xl transform transition active:scale-95 mb-2.5 border-2 border-amber-200 tracking-wider flex items-center justify-center gap-2 cursor-pointer">
+                <span>▶</span> MULAI BERMAIN
+            </button>
+            <button id="lb-btn" type="button" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 rounded-2xl shadow-md transform transition active:scale-95 border border-sky-400 text-sm flex items-center justify-center gap-2 cursor-pointer">
+                <span>🏆</span> Peringkat Global Top 100
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= GAME SCREEN ================= -->
+    <div id="game-screen" class="hidden absolute inset-0 flex-col p-2.5 md:p-4 gap-2 justify-between max-w-4xl mx-auto">
+        <!-- Top HUD -->
+        <div class="flex justify-between items-center z-20 gap-1.5">
+            <div class="hud-pill px-3.5 py-1.5 flex items-center gap-2.5 md:gap-4">
+                <div class="text-center">
+                    <p class="text-sky-700 font-extrabold text-[9px] uppercase tracking-wider mb-[-2px]">LEVEL</p>
+                    <p id="level-display" class="title-font text-sky-950 text-lg md:text-xl">1</p>
+                </div>
+                <div class="w-px h-6 bg-sky-300"></div>
+                <div class="text-center">
+                    <p class="text-amber-700 font-extrabold text-[9px] uppercase tracking-wider mb-[-2px]">SKOR</p>
+                    <p id="score-display" class="title-font text-amber-600 text-lg md:text-xl">0</p>
+                </div>
+                <!-- Streak Combo Badge -->
+                <div id="combo-pill" class="hidden bg-gradient-to-r from-orange-500 to-amber-500 text-white text-[10px] md:text-xs font-black px-2.5 py-0.5 rounded-full shadow-sm animate-bounce">
+                    🔥 x2
+                </div>
+            </div>
+
+            <div id="lives-container" class="hud-pill px-3 py-1.5 flex gap-1 items-center"></div>
+
+            <div class="flex items-center gap-1.5">
+                <button onclick="togglePause()" id="pause-btn" title="Jeda Permainan" class="hud-pill p-2 hover:bg-sky-100 transition active:scale-90">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-sky-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </button>
+                <button onclick="toggleAudio()" title="Suara" class="hud-pill p-2 hover:bg-sky-100 transition active:scale-90">
+                    <svg id="audio-icon" class="w-5 h-5 md:w-6 md:h-6 text-sky-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Interactive Pond Area -->
+        <div class="flex-1 relative w-full game-pond-bg overflow-hidden my-auto select-none" id="pond-area" style="min-height: 45vh; max-height: 62vh;">
+            <div class="sunbeams"></div>
+
+            <!-- Decorative Pond Pebbles & Aquatic Plants -->
+            <svg class="absolute top-3 left-3 w-16 h-16 md:w-20 md:h-20 opacity-85 z-20 pointer-events-none floating" viewBox="0 0 100 100">
+                <circle cx="52" cy="54" r="38" fill="rgba(3, 105, 161, 0.3)"/>
+                <path d="M50,12 C78,12 90,38 88,62 C86,82 58,90 48,88 C20,82 12,50 22,24 C30,12 40,12 50,12 Z" fill="#22c55e" stroke="#15803d" stroke-width="2.5"/>
+                <path d="M50,12 L50,50 L25,32 M50,50 L72,36" stroke="#166534" stroke-width="2" fill="none"/>
+            </svg>
+
+            <svg class="absolute bottom-3 right-3 w-20 h-20 md:w-24 md:h-24 opacity-85 z-20 pointer-events-none floating-delayed" viewBox="0 0 100 100">
+                <circle cx="52" cy="54" r="38" fill="rgba(3, 105, 161, 0.3)"/>
+                <path d="M50,12 C78,12 90,38 88,62 C86,82 58,90 48,88 C20,82 12,50 22,24 C30,12 40,12 50,12 Z" fill="#16a34a" stroke="#14532d" stroke-width="2.5"/>
+                <circle cx="48" cy="48" r="11" fill="#f43f5e"/>
+                <circle cx="48" cy="48" r="5" fill="#fef08a"/>
+            </svg>
+
+            <!-- Level Up Notification Banner inside Pond -->
+            <div id="level-up-banner" class="hidden absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-40 pointer-events-none">
+                <div class="bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-400 text-sky-950 px-6 py-3 rounded-3xl border-4 border-white shadow-2xl text-center animate-bounce">
+                    <p class="text-xs font-black uppercase tracking-widest text-amber-900">LUAR BIASA!</p>
+                    <p id="level-up-text" class="title-font text-2xl md:text-3xl">NAIK LEVEL 2!</p>
+                </div>
+            </div>
+
+            <!-- Pause Modal Overlay inside Pond -->
+            <div id="pause-overlay" class="hidden absolute inset-0 z-50 bg-sky-950/60 backdrop-blur-sm flex flex-col items-center justify-center p-4">
+                <div class="glass-bright p-6 text-center max-w-xs w-full border-4 border-sky-300">
+                    <h3 class="title-font text-2xl text-sky-950 mb-2">PERMAINAN DIJEDA</h3>
+                    <p class="text-xs text-sky-800 font-bold mb-4">Istirahat sejenak, siap tangkap ikan lagi?</p>
+                    <button onclick="togglePause()" class="w-full bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-950 font-black py-3 rounded-2xl shadow-lg mb-2.5 border-2 border-emerald-200 active:scale-95 transition">
+                        ▶ LANJUTKAN
+                    </button>
+                    <button onclick="quitToHome()" class="w-full bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold py-2.5 rounded-2xl text-sm border border-rose-300 active:scale-95 transition">
+                        🏠 Menu Utama
+                    </button>
+                </div>
+            </div>
+
+            <!-- Container for Ambient Bubbles & Ripples -->
+            <div id="effects-container" class="absolute inset-0 pointer-events-none z-5"></div>
+
+            <!-- Container for Swimming Fish -->
+            <div id="fish-container" class="absolute inset-0 z-10"></div>
+        </div>
+
+        <!-- Bottom Question & Bucket Bar -->
+        <div class="flex justify-between items-end gap-3 z-20 h-20 md:h-24">
+            <div class="flex-1 neon-box p-2.5 md:p-3 text-center relative overflow-hidden h-full flex flex-col justify-center">
+                <!-- Smooth Timer Progress Bar -->
+                <div class="absolute top-0 left-0 right-0 h-2 bg-sky-100 overflow-hidden">
+                    <div id="timer-bar" class="h-full bg-gradient-to-r from-emerald-500 via-amber-400 to-rose-500 w-full origin-left transition-transform duration-75"></div>
+                </div>
+                <p class="text-sky-700 text-[10px] md:text-xs font-extrabold uppercase tracking-wider mt-1">🎯 Tangkap Ikan Hasil Dari:</p>
+                <div id="question-wrapper" class="flex items-center justify-center">
+                    <h2 id="question-text" class="title-font text-3xl md:text-4xl text-sky-950 drop-shadow-sm leading-none mt-0.5">10 × 5</h2>
+                </div>
+            </div>
+            
+            <!-- Animated Wooden Fish Bucket -->
+            <div id="bucket-wrapper" class="w-20 h-20 md:w-24 md:h-24 flex-shrink-0 relative drop-shadow-xl">
+                <svg viewBox="0 0 100 100" class="w-full h-full overflow-visible">
+                    <!-- Bucket Handle -->
+                    <path d="M18,28 Q50,-2 82,28" stroke="#cbd5e1" stroke-width="3.5" fill="none"/>
+                    <!-- Bucket Rim & Water Inside -->
+                    <ellipse cx="50" cy="26" rx="32" ry="11" fill="#451a03"/>
+                    <ellipse cx="50" cy="28" rx="28" ry="8.5" fill="#38bdf8"/>
+                    <!-- Cute Little Fish Tail Poking Out When Caught > 0 -->
+                    <g id="bucket-fish-tail" class="hidden" transform="translate(54, 18) rotate(25)">
+                        <path d="M0,10 L-8,0 L-3,10 L-8,18 Z" fill="#f97316"/>
+                    </g>
+                    <!-- Bucket Body -->
+                    <path d="M19,26 L29,90 C29,96 71,96 71,90 L81,26 Z" fill="url(#woodGrad)" stroke="#451a03" stroke-width="2.5"/>
+                    <defs>
+                        <linearGradient id="woodGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#78350f"/>
+                            <stop offset="35%" stop-color="#b45309"/>
+                            <stop offset="70%" stop-color="#92400e"/>
+                            <stop offset="100%" stop-color="#451a03"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Metal Bands -->
+                    <path d="M22,45 Q50,53 78,45" stroke="#94a3b8" stroke-width="4" fill="none"/>
+                    <path d="M26,72 Q50,80 74,72" stroke="#94a3b8" stroke-width="3.5" fill="none"/>
+                    <!-- Counter Text -->
+                    <text id="bucket-count" x="50" y="68" font-family="Fredoka One, cursive" font-size="25" fill="#ffffff" text-anchor="middle" stroke="#451a03" stroke-width="2">0</text>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= GAME OVER SCREEN ================= -->
+    <div id="game-over-screen" class="hidden absolute inset-0 z-50 flex items-center justify-center bright-pond-bg pond-pattern p-4 overflow-y-auto">
+        <div id="confetti-container" class="absolute inset-0 pointer-events-none overflow-hidden"></div>
+        <div class="glass-bright p-6 md:p-8 rounded-3xl w-full max-w-sm text-center border-4 border-amber-300 shadow-2xl relative overflow-hidden my-auto">
+            <div class="flex justify-center mb-1"><span class="text-5xl animate-bounce">🏆</span></div>
+            <h2 class="title-font text-2xl md:text-3xl text-sky-950 mb-4 shimmer-gold-text">PERMAINAN SELESAI</h2>
+            
+            <div class="bg-white/95 rounded-2xl p-5 mb-4 border-2 border-sky-200 shadow-md relative">
+                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-sky-500 to-blue-600 text-white text-[11px] font-black px-4 py-1 rounded-full border border-sky-200 shadow-sm" id="final-level">Level 1</div>
+                <p class="text-sky-800 text-xs font-black uppercase tracking-widest mb-0.5 mt-2">Total Tangkapan Ikan</p>
+                <p class="text-sky-600 text-xl font-black mb-3"><span id="final-fish">0 Ekor</span> 🐟</p>
+                <p class="text-amber-700 text-xs font-black uppercase tracking-widest mb-1">Skor Akhir</p>
+                <p id="final-score" class="title-font text-amber-500 text-6xl leading-none drop-shadow-md">0</p>
+            </div>
+            
+            <p class="text-sky-900 text-xs mb-5 bg-sky-100/90 py-2.5 px-3 rounded-xl border border-sky-200 font-semibold truncate"><b id="player-summary" class="font-black">Nama - SDN</b></p>
+
+            <button onclick="resetToHome()" class="w-full bg-gradient-to-r from-emerald-400 to-emerald-500 hover:from-emerald-300 hover:to-emerald-400 text-slate-950 font-black py-3.5 rounded-2xl shadow-xl mb-2.5 text-base border-2 border-emerald-300 transition active:scale-95">
+                🔄 MAIN LAGI
+            </button>
+            <button onclick="showLeaderboard()" class="w-full bg-sky-100 hover:bg-sky-200 text-sky-800 font-bold py-3 rounded-2xl text-sm shadow-md border-2 border-sky-300 transition active:scale-95 flex items-center justify-center gap-2">
+                <span>🏆</span> Lihat Peringkat Global
+            </button>
+        </div>
+    </div>
+
+    <!-- ================= LEADERBOARD SCREEN ================= -->
+    <div id="leaderboard-screen" class="hidden absolute inset-0 z-[60] flex items-center justify-center bg-sky-950/60 backdrop-blur-md p-3 md:p-5 opacity-0 transition-opacity duration-300">
+        <div id="leaderboard-modal" class="glass-bright p-5 md:p-6 rounded-3xl w-full max-w-lg h-[88vh] max-h-[800px] flex flex-col border-4 border-amber-300 shadow-2xl relative transform scale-95 transition-transform duration-300">
+            <button onclick="closeLeaderboard()" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-rose-100 text-rose-600 rounded-full hover:bg-rose-200 transition font-black border border-rose-300 z-20 shadow-sm">✕</button>
+
+            <div class="text-center mb-4 border-b-2 border-sky-200/80 pb-4 pt-1">
+                <div class="flex items-center justify-center gap-2 mb-1">
+                    <span class="text-3xl animate-bounce">👑</span>
+                    <h2 class="title-font text-2xl md:text-3xl text-sky-950 shimmer-gold-text drop-shadow-sm">TOP 100 GLOBAL</h2>
+                </div>
+                <p class="text-[10px] md:text-xs text-sky-700 font-extrabold uppercase tracking-widest bg-sky-100/80 inline-block px-3 py-1 rounded-full border border-sky-200">1 Perangkat = 1 Skor Terbaik</p>
+            </div>
+
+            <div id="lb-player-banner" class="hidden mb-3 bg-gradient-to-r from-sky-100 via-amber-100 to-sky-100 border-2 border-amber-400 p-3 rounded-2xl text-center shadow-md relative overflow-hidden flex-shrink-0">
+                <div class="flex justify-between items-center px-1">
+                    <div class="text-left min-w-0 pr-2">
+                        <span class="text-[10px] font-black uppercase tracking-wider text-amber-800 flex items-center gap-1">
+                            <span>✨</span> SKOR TERAKHIR KAMU
+                        </span>
+                        <p id="lb-player-name" class="text-sky-950 font-black text-sm md:text-base truncate leading-tight">Pemain</p>
+                    </div>
+        // Sentuhan pada air kolam memunculkan riak air interaktif & ayunan jaring
+        pondArea.addEventListener('pointerdown', (e) => {
+            if (!isPlaying || isPaused) return;
+            const rect = pondArea.getBoundingClientRect();
+            const localX = e.clientX - rect.left;
+            const localY = e.clientY - rect.top;
+            createWaterRipple(localX, localY);
+            createFishingNet(localX, localY, false);
+            createSplashDroplets(localX, localY, 5);
+            playWaterRippleSound();
+        });
+
+        function createWaterRipple(x, y) {
+            const ripple = document.createElement('div');
+            ripple.className = 'water-ripple';
+            ripple.style.left = (x - 45) + 'px';
+            ripple.style.top = (y - 45) + 'px';
+            ripple.innerHTML = `<div class="water-ripple-inner"></div>`;
+            effectsContainer.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 620);
+        }
+
+        // Animasi Jaring Serokan Ikan
+        function createFishingNet(x, y, isCatch = true) {
+            const net = document.createElement('div');
+            net.className = 'fishing-net-effect';
+            net.style.left = (x - 52) + 'px';
+            net.style.top = (y - 52) + 'px';
+
+            const rimColor = isCatch ? '#f59e0b' : '#0284c7';
+            const meshColor = isCatch ? 'rgba(254, 243, 199, 0.92)' : 'rgba(224, 242, 254, 0.85)';
+
+            net.innerHTML = `
+                <svg viewBox="0 0 130 130" class="w-full h-full drop-shadow-xl overflow-visible">
+                    <!-- Bayangan Jaring di Air -->
+                    <ellipse cx="52" cy="58" rx="40" ry="36" fill="rgba(2, 132, 199, 0.28)" />
+                    <!-- Gagang Kayu Serokan -->
+                    <path d="M80,78 L124,122" stroke="#78350f" stroke-width="11" stroke-linecap="round"/>
+                    <path d="M80,78 L122,120" stroke="#b45309" stroke-width="6" stroke-linecap="round"/>
+                    <!-- Sambungan Logam -->
+                    <path d="M74,72 L85,83" stroke="#cbd5e1" stroke-width="9" stroke-linecap="round"/>
+                    <!-- Kantong Jaring (Mesh Bag) -->
+                    <ellipse cx="48" cy="48" rx="39" ry="35" fill="rgba(255, 255, 255, 0.22)"/>
+                    <!-- Anyaman Jaring (Grid) -->
+                    <g stroke="${meshColor}" stroke-width="1.8" fill="none" opacity="0.9">
+                        <path d="M18,32 Q48,52 78,32"/>
+                        <path d="M12,48 Q48,70 84,48"/>
+                        <path d="M18,64 Q48,82 78,64"/>
+                        <path d="M32,16 Q48,48 32,80"/>
+                        <path d="M48,13 Q62,48 48,83"/>
+                        <path d="M64,16 Q76,48 64,80"/>
+                        <ellipse cx="48" cy="52" rx="26" ry="22" stroke-dasharray="4 3"/>
+                    </g>
+                    <!-- Bingkai Lingkaran Jaring -->
+                    <ellipse cx="48" cy="48" rx="39" ry="35" fill="none" stroke="${rimColor}" stroke-width="6"/>
+                    <ellipse cx="48" cy="48" rx="39" ry="35" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.7"/>
+                </svg>
+            `;
+            pondArea.appendChild(net);
+            setTimeout(() => net.remove(), 560);
+        }
+
+        // Efek Butiran Percikan Air (Saat Ikan Melompat / Jaring Menyendok)
+        function createSplashDroplets(x, y, count = 8) {
+            for (let i = 0; i < count; i++) {
+                const drop = document.createElement('div');
+                drop.className = 'water-droplet';
+                drop.style.left = (x - 4) + 'px';
+                drop.style.top = (y - 4) + 'px';
+                const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.5 - 0.25);
+                const dist = 28 + Math.random() * 42;
+                const dx = Math.cos(angle) * dist;
+                const dy = Math.sin(angle) * dist - 12; // sedikit melambung ke atas
+                drop.style.setProperty('--dx', `${dx.toFixed(1)}px`);
+                drop.style.setProperty('--dy', `${dy.toFixed(1)}px`);
+                effectsContainer.appendChild(drop);
+                setTimeout(() => drop.remove(), 550);
+            }
+        }
+
+        function spawnAmbientBubble() {
+            if (!isPlaying || isPaused) return;
+            const w = pondArea.clientWidth;
+            const h = pondArea.clientHeight;
+            const bubble = document.createElement('div');
+            const size = 6 + Math.random() * 10;
+            bubble.className = 'pond-bubble';
+            bubble.style.width = size + 'px';
+            bubble.style.height = size + 'px';
+            bubble.style.left = (20 + Math.random() * (w - 40)) + 'px';
+        let praiseWords = ["HEBAT! 🎉", "PINTAR! ⭐", "BENAR! 🌟", "LUAR BIASA! 🐠", "MANTAP! 🏆"];
+
+        // Event Listener langsung yang aman pada DOM tanpa kendala inline handler
+        window.addEventListener('DOMContentLoaded', () => {
+            const startBtn = document.getElementById('start-btn');
+            if (startBtn) {
+                startBtn.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    checkAndStart();
+                });
+            }
+
+            const lbBtn = document.getElementById('lb-btn');
+            if (lbBtn) {
+                lbBtn.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    showLeaderboard();
+                });
+            }
+        });
+
+        function animateFishIntoBucket(startX, startY, palette) {
+            const bucketEl = document.getElementById('bucket-wrapper');
+            if (!bucketEl) return;
+            const bucketRect = bucketEl.getBoundingClientRect();
+            const targetX = bucketRect.left + bucketRect.width * 0.5 - 48;
+            const targetY = bucketRect.top + 8;
+
+            const clone = document.createElement('div');
+            clone.className = 'flying-fish-clone';
+            const initX = startX - 48;
+            const initY = startY - 25;
+            clone.style.left = initX + 'px';
+            clone.style.top = initY + 'px';
+            clone.innerHTML = `
+                <svg viewBox="0 0 110 56" class="w-full h-full drop-shadow-2xl overflow-visible">
+                    <ellipse cx="52" cy="48" rx="28" ry="8" fill="rgba(2, 132, 199, 0.22)"/>
+                    <path class="fish-fin-left" d="M48,18 Q38,2 56,4 Q62,12 52,20 Z" fill="${palette.fin}"/>
+                    <path class="fish-fin-right" d="M48,38 Q38,54 56,52 Q62,44 52,36 Z" fill="${palette.fin}"/>
+                    <path class="fish-tail" d="M26,28 L4,10 Q14,28 4,46 Z" fill="${palette.tail}"/>
+                    <path d="M22,28 Q45,6 82,20 Q100,28 96,28 Q100,28 82,36 Q45,50 22,28 Z" fill="${palette.body}" stroke="${palette.border}" stroke-width="1.2"/>
+                    <path d="M38,21 Q52,12 66,22 Q54,32 38,21 Z" fill="${palette.spot1}"/>
+                    <circle cx="72" cy="30" r="5.5" fill="${palette.spot2}"/>
+                    <circle cx="86" cy="22" r="2.8" fill="#0f172a"/>
+                    <circle cx="86" cy="34" r="2.8" fill="#0f172a"/>
+                </svg>
+            `;
+            document.body.appendChild(clone);
+
+            // Animasi Lompatan Parabola Melengkung Tinggi ke Ember
+            const duration = 620;
+            const startTime = performance.now();
+            const jumpPeakHeight = Math.min(220, Math.max(130, Math.abs(targetY - initY) * 0.65));
+
+            let prevX = initX;
+            let prevY = initY;
+
+            function stepJump(now) {
+                const t = Math.min(1, (now - startTime) / duration);
+                // Kurva horizontal halus
+                const curX = initX + (targetX - initX) * t;
+                // Kurva vertikal parabola: 4 * t * (1 - t) mencapai puncak 1.0 saat t = 0.5
+                const arcOffset = -4 * jumpPeakHeight * t * (1 - t);
+                const curY = initY + (targetY - initY) * t + arcOffset;
+
+                // Hitung sudut arah lompatan ikan agar kepala mengarah sesuai lintasan
+                const vx = curX - prevX;
+                const vy = curY - prevY;
+                const angleDeg = (Math.abs(vx) + Math.abs(vy) > 0.1)
+                    ? Math.atan2(vy, vx) * (180 / Math.PI)
+                    : -45;
+
+                // Efek membesar saat di puncak lompatan lalu mengecil masuk ke mulut ember
+                const scale = t < 0.5
+                    ? 1 + 0.45 * (t / 0.5)
+                    : 1.45 - 0.95 * ((t - 0.5) / 0.5);
+
+                clone.style.left = `${curX.toFixed(1)}px`;
+                clone.style.top = `${curY.toFixed(1)}px`;
+                clone.style.transform = `scale(${scale.toFixed(2)}) rotate(${angleDeg.toFixed(1)}deg)`;
+
+                prevX = curX;
+                prevY = curY;
+
+                if (t < 1) {
+                    requestAnimationFrame(stepJump);
+                } else {
+                    clone.remove();
+                    bucketEl.classList.remove('bucket-jiggle');
+                    void bucketEl.offsetWidth;
+                    bucketEl.classList.add('bucket-jiggle');
+                    document.getElementById('bucket-fish-tail').classList.remove('hidden');
+                }
+            }
+
+            requestAnimationFrame(stepJump);
+        }
+
+        function checkAndStart() {
+            const rawNama = document.getElementById('reg-nama').value;
+            const rawSekolah = document.getElementById('reg-sekolah').value;
+            const rawKelas = document.getElementById('reg-kelas').value;
+
+            pNama = window.sanitizeName(rawNama);
+            pSekolah = window.sanitizeSekolah(rawSekolah);
+            pKelas = window.sanitizeKelas(rawKelas);
+
+            if (!rawNama.trim() || !rawKelas.trim()) { 
+                document.getElementById('form-error').classList.remove('hidden');
+                return; 
+            }
+            document.getElementById('form-error').classList.add('hidden');
+
+            initAudio(); 
+            startBGM();
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('game-screen').classList.add('flex');
+            document.getElementById('pause-overlay').classList.add('hidden');
+            document.getElementById('bucket-fish-tail').classList.add('hidden');
+            
+            score = 0; level = 1; lives = 3; fishCaughtCount = 0; comboStreak = 0;
+            isPlaying = true; isPaused = false;
+            
+            updateHUD(); 
+            nextQuestion();
+            
+            lastTimestamp = performance.now();
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function togglePause() {
+            if (!isPlaying) return;
+            isPaused = !isPaused;
+            const overlay = document.getElementById('pause-overlay');
+            if (isPaused) {
+                overlay.classList.remove('hidden');
+                stopBGM();
+            } else {
+                overlay.classList.add('hidden');
+                if (!window.audioMuted) startBGM();
+                lastTimestamp = performance.now();
+                animationFrameId = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function quitToHome() {
+            isPlaying = false;
+            isPaused = false;
+            stopBGM();
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            document.getElementById('pause-overlay').classList.add('hidden');
+            resetToHome();
+        }
+
+        function gameLoop(timestamp) {
+            if (!isPlaying || isPaused) return;
+            
+            const deltaTime = Math.min((timestamp - lastTimestamp) / 1000, 0.1); 
+            lastTimestamp = timestamp;
+
+            // Update Timer
+            timeRemaining -= deltaTime;
+            const timerScale = Math.max(0, timeRemaining / maxTime);
+            document.getElementById('timer-bar').style.transform = `scaleX(${timerScale})`;
+
+            if (timeRemaining <= 0) { 
+                handleMistake( pondArea.clientWidth / 2, pondArea.clientHeight / 2, "WAKTU HABIS!" ); 
+                return; 
+            }
+
+            // Ambient Bubbles
+            bubbleTimer += deltaTime;
+            if (bubbleTimer > 0.65) {
+                bubbleTimer = 0;
+                spawnAmbientBubble();
+            }
+
+            const w = pondArea.clientWidth; 
+            const h = pondArea.clientHeight;
+            const margin = 52;
+
+            fishEntities.forEach((fish, idx) => {
+                if (fish.caught) return;
+
+                // Soft organic wandering curve
+                fish.wanderPhase += deltaTime * 2.2;
+                const wanderForce = Math.sin(fish.wanderPhase) * 35;
+                const perpX = -fish.vy / (fish.speed || 1);
+                const perpY = fish.vx / (fish.speed || 1);
+                fish.vx += perpX * wanderForce * deltaTime;
+                fish.vy += perpY * wanderForce * deltaTime;
+
+                // Soft steering away from pond borders
+                const turnFactor = fish.speed * 4.2;
+                if (fish.x < margin) fish.vx += turnFactor * deltaTime;
+                else if (fish.x > w - 105 - margin) fish.vx -= turnFactor * deltaTime;
+                
+                if (fish.y < margin) fish.vy += turnFactor * deltaTime;
+                else if (fish.y > h - 55 - margin) fish.vy -= turnFactor * deltaTime;
+
+                // Soft fish-to-fish separation so numbers don't overlap
+                for (let j = 0; j < fishEntities.length; j++) {
+                    if (idx === j || fishEntities[j].caught) continue;
+                    const other = fishEntities[j];
+                    const dx = fish.x - other.x;
+                    const dy = fish.y - other.y;
+                    const distSq = dx * dx + dy * dy;
+                    if (distSq < 6400 && distSq > 1) { // < 80px apart
+                        const dist = Math.sqrt(distSq);
+                        const push = (80 - dist) * 1.8;
+                        fish.vx += (dx / dist) * push * deltaTime;
+                        fish.vy += (dy / dist) * push * deltaTime;
+                    }
+                }
+
+                // Normalize velocity to target speed
+                const currentSpeed = Math.sqrt(fish.vx * fish.vx + fish.vy * fish.vy);
+                if (currentSpeed > 0.01) {
+                    fish.vx = (fish.vx / currentSpeed) * fish.speed;
+                    fish.vy = (fish.vy / currentSpeed) * fish.speed;
+                }
+
+                fish.x += fish.vx * deltaTime; 
+                fish.y += fish.vy * deltaTime;
+
+                // Hard safety bounds
+                if (fish.x < -15) { fish.x = -15; fish.vx = Math.abs(fish.vx); }
+                if (fish.x > w - 85) { fish.x = w - 85; fish.vx = -Math.abs(fish.vx); }
+                if (fish.y < -10) { fish.y = -10; fish.vy = Math.abs(fish.vy); }
+                if (fish.y > h - 42) { fish.y = h - 42; fish.vy = -Math.abs(fish.vy); }
+
+                // Occasional wake ripple behind fish tail
+                fish.wakeTimer += deltaTime;
+                if (fish.wakeTimer > 0.45 && !fish.isJumping) {
+                    fish.wakeTimer = 0;
+                    const wake = document.createElement('div');
+                    wake.className = 'fish-wake';
+                    wake.style.left = (fish.x + 48 - (fish.vx / fish.speed) * 32) + 'px';
+                    wake.style.top = (fish.y + 23 - (fish.vy / fish.speed) * 32) + 'px';
+                    effectsContainer.appendChild(wake);
+                    setTimeout(() => wake.remove(), 900);
+                }
+
+                // Animasi Gerakan Tambahan: Ikan Melompat Keluar Air Secara Berkala
+                fish.jumpCooldown -= deltaTime;
+                if (fish.jumpCooldown <= 0 && !fish.isJumping) {
+                    fish.isJumping = true;
+                    fish.jumpTime = 0;
+                    fish.jumpDuration = 0.68;
+                    // Efek cipratan air saat ikan mulai melompat dari permukaan kolam
+                    createWaterRipple(fish.x + 53, fish.y + 27);
+                    createSplashDroplets(fish.x + 53, fish.y + 27, 5);
+                    playFishJumpSound();
+                }
+
+                let jumpScale = 1;
+                let jumpLiftY = 0;
+                if (fish.isJumping) {
+                    fish.jumpTime += deltaTime;
+                    const jp = fish.jumpTime / fish.jumpDuration;
+                    if (jp >= 1) {
+                        fish.isJumping = false;
+                        fish.jumpCooldown = 3.2 + Math.random() * 5.0;
+                        // Cipratan air saat ikan mendarat kembali ke dalam kolam
+                        createWaterRipple(fish.x + 53, fish.y + 27);
+                        createSplashDroplets(fish.x + 53, fish.y + 27, 6);
+                        if (fish.shadowEl) {
+                            fish.shadowEl.setAttribute('cy', '36');
+                            fish.shadowEl.setAttribute('rx', '34');
+                            fish.shadowEl.setAttribute('fill', 'rgba(3, 105, 161, 0.28)');
+                        }
+                        if (fish.innerEl) {
+                            fish.innerEl.style.transform = '';
+                        }
+                    } else {
+                        const sinJump = Math.sin(jp * Math.PI);
+                        jumpScale = 1 + 0.38 * sinJump;
+                        jumpLiftY = -26 * sinJump;
+                        // Saat melompat, ikan melaju sedikit lebih cepat
+                        fish.x += fish.vx * 0.45 * sinJump * deltaTime;
+                        fish.y += fish.vy * 0.45 * sinJump * deltaTime;
+
+                        if (fish.innerEl) {
+                            fish.innerEl.style.transform = `translateY(${jumpLiftY.toFixed(1)}px) scale(${jumpScale.toFixed(2)})`;
+                        }
+                        // Bayangan terpisah jauh di bawah air saat ikan melambung di udara
+                        if (fish.shadowEl) {
+                            const shadowCy = 36 + sinJump * 26;
+                            const shadowRx = 34 - sinJump * 10;
+                            fish.shadowEl.setAttribute('cy', shadowCy.toFixed(1));
+                            fish.shadowEl.setAttribute('rx', shadowRx.toFixed(1));
+                            fish.shadowEl.setAttribute('fill', `rgba(3, 105, 161, ${(0.28 - sinJump * 0.14).toFixed(2)})`);
+                        }
+                    }
+                }
+
+                // Smooth rotation of fish body while keeping number badge 100% upright
+                if (fish.el && fish.textEl) {
+                    const angleRad = Math.atan2(fish.vy, fish.vx);
+                    const angleDeg = angleRad * (180 / Math.PI);
+                    
+                    fish.el.style.transform = `translate3d(${fish.x.toFixed(1)}px, ${fish.y.toFixed(1)}px, 0) rotate(${angleDeg.toFixed(1)}deg)`;
+                    fish.textEl.style.transform = `rotate(${(-angleDeg).toFixed(1)}deg)`;
+                    fish.el.style.zIndex = fish.isJumping ? '28' : '10';
+                }
+            });
+
+            animationFrameId = requestAnimationFrame(gameLoop);
+        }
+
+        function updateHUD() {
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('level-display').innerText = level;
+            document.getElementById('bucket-count').textContent = fishCaughtCount; 
+            
+            const comboPill = document.getElementById('combo-pill');
+            if (comboStreak >= 2) {
+                comboPill.innerText = `🔥 Combo x${comboStreak}`;
+                comboPill.classList.remove('hidden');
+            } else {
+                comboPill.classList.add('hidden');
+            }
+
+            let livesHTML = '';
+            for(let i = 0; i < 3; i++) livesHTML += (i < lives) ? heartSVG : heartEmptySVG;
+            document.getElementById('lives-container').innerHTML = livesHTML;
+        }
+
+        function showLevelUpBanner(newLevel) {
+            playLevelUpSound();
+            const banner = document.getElementById('level-up-banner');
+            const text = document.getElementById('level-up-text');
+            text.innerText = `NAIK LEVEL ${newLevel}!`;
+            banner.classList.remove('hidden');
+            setTimeout(() => banner.classList.add('hidden'), 1400);
+        }
+
+        function nextQuestion() {
+            if(!isPlaying) return;
+            
+            const fishCount = Math.min(3 + Math.floor(level / 2), 6);
+            maxTime = Math.max(15 - (level - 1) * 1.3, 5.5);
+            timeRemaining = maxTime;
+
+            const isTen = Math.random() > 0.5;
+            const factor1 = isTen ? 10 : 1;
+            const factor2 = Math.floor(Math.random() * 10) + 1;
+            currentCorrectAnswer = factor1 * factor2;
+            
+            // Randomize order (e.g. 10 x 5 or 5 x 10) to make learning richer
+            const swapOrder = Math.random() > 0.5;
+            const qText = swapOrder ? `${factor2} × ${factor1}` : `${factor1} × ${factor2}`;
+            const qEl = document.getElementById('question-text');
+            qEl.innerText = qText;
+            qEl.classList.remove('question-pop-anim');
+            void qEl.offsetWidth;
+            qEl.classList.add('question-pop-anim');
+
+            let answers = [currentCorrectAnswer];
+            let loopLimit = 0;
+            while(answers.length < fishCount && loopLimit < 40) {
+                loopLimit++;
+                const wIsTen = Math.random() > 0.5;
+                const wrong = (Math.floor(Math.random() * 10) + 1) * (wIsTen ? 10 : 1);
+                if(!answers.includes(wrong) && wrong !== currentCorrectAnswer) answers.push(wrong);
+            }
+            answers.sort(() => Math.random() - 0.5);
+
+            spawnFish(answers);
+        }
+
+        function spawnFish(answers) {
+            domFishContainer.innerHTML = ''; 
+            fishEntities = [];
+            const w = Math.max(pondArea.clientWidth, 280); 
+            const h = Math.max(pondArea.clientHeight, 220);
+            const baseSpeed = 48 + (level * 7.5);
+
+            answers.forEach((ans, idx) => {
+                const palette = koiPalettes[idx % koiPalettes.length];
+                const fishDiv = document.createElement('div');
+                fishDiv.className = 'fish-entity flex items-center justify-center';
+                fishDiv.style.width = '106px'; 
+                fishDiv.style.height = '54px';
+                
+                // Menggunakan div HTML biasa (.text-group) yang dirotasi berlawanan agar angka selalu tegak & tajam di semua browser HP
+                fishDiv.innerHTML = `
+                    <div class="fish-inner fish-spawn-anim">
+                        <svg viewBox="0 0 110 56" class="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
+                            <!-- Underwater Drop Shadow for 3D Depth & Jump Elevation -->
+                            <ellipse class="fish-shadow" cx="56" cy="36" rx="34" ry="11" fill="rgba(3, 105, 161, 0.28)"/>
+                            <!-- Pectoral Fins -->
+                            <path class="fish-fin-left" d="M48,18 Q38,2 56,4 Q62,12 52,20 Z" fill="${palette.fin}" opacity="0.95"/>
+                            <path class="fish-fin-right" d="M48,38 Q38,54 56,52 Q62,44 52,36 Z" fill="${palette.fin}" opacity="0.95"/>
+                            <!-- Tail Fin -->
+                            <path class="fish-tail" d="M26,28 L4,10 Q14,28 4,46 Z" fill="${palette.tail}"/>
+                            <!-- Koi Body -->
+                            <path d="M22,28 Q45,6 82,20 Q100,28 96,28 Q100,28 82,36 Q45,50 22,28 Z" fill="${palette.body}" stroke="${palette.border}" stroke-width="1"/>
+                            <!-- Koi Pattern Markings -->
+                            <path d="M36,20 Q52,11 66,22 Q52,32 36,20 Z" fill="${palette.spot1}"/>
+                            <circle cx="72" cy="31" r="5.5" fill="${palette.spot2}" opacity="0.85"/>
+                            <!-- Eyes -->
+                            <circle cx="86" cy="21.5" r="2.6" fill="#0f172a"/>
+                            <circle cx="87" cy="20.8" r="0.9" fill="#ffffff"/>
+                            <circle cx="86" cy="34.5" r="2.6" fill="#0f172a"/>
+                            <circle cx="87" cy="33.8" r="0.9" fill="#ffffff"/>
+                        </svg>
+                        
+                        <div class="text-group absolute flex items-center justify-center bg-white border-[2.5px] rounded-full shadow-md" style="width: 31px; height: 31px; left: 39px; top: 11.5px; border-color: ${palette.border}; transform-origin: center; z-index: 10;">
+                            <span class="text-slate-950 font-black leading-none" style="font-family: 'Fredoka One', sans-serif; font-size: 14px;">${ans}</span>
+                        </div>
+                    </div>
+                `;
+
+                const textGroup = fishDiv.querySelector('.text-group');
+                const innerEl = fishDiv.querySelector('.fish-inner');
+                const shadowEl = fishDiv.querySelector('.fish-shadow');
+
+                // Grid-based initial placement so fish don't spawn on top of each other
+                const cols = 3;
+                const col = idx % cols;
+                const row = Math.floor(idx / cols);
+                const cellW = (w - 120) / cols;
+                const cellH = (h - 70) / 2;
+                const startX = 15 + col * cellW + Math.random() * Math.max(10, cellW - 40);
+                const startY = 15 + row * cellH + Math.random() * Math.max(10, cellH - 30);
+
+                const angle = Math.random() * Math.PI * 2;
+                const fishObj = {
+                    el: fishDiv, 
+                    textEl: textGroup,
+                    innerEl: innerEl,
+                    shadowEl: shadowEl,
+                    x: startX, 
+                    y: startY,
+                    vx: Math.cos(angle) * baseSpeed, 
+                    vy: Math.sin(angle) * baseSpeed,
+                    speed: baseSpeed * (0.92 + Math.random() * 0.18),
+                    wanderPhase: Math.random() * Math.PI * 2,
+                    wakeTimer: Math.random() * 0.4,
+                    jumpCooldown: 1.2 + idx * 1.4 + Math.random() * 2.5,
+                    isJumping: false,
+                    jumpTime: 0,
+                    jumpDuration: 0.68,
+                    palette: palette,
+                    caught: false
+                };
+
+                fishDiv.onpointerdown = (e) => {
+                    e.stopPropagation();
+                    if (!isPlaying || isPaused || fishObj.caught) return;
+                    
+                    const rect = pondArea.getBoundingClientRect();
+                    const localX = e.clientX - rect.left;
+                    const localY = e.clientY - rect.top;
+
+                    createWaterRipple(localX, localY);
+                    createFishingNet(localX, localY, ans === currentCorrectAnswer);
+                    createSplashDroplets(localX, localY, 10);
+                    catchFish(ans, fishObj, e.clientX, e.clientY, localX, localY);
+                };
+                
+                fishEntities.push(fishObj); 
+                domFishContainer.appendChild(fishDiv);
+            });
+        }
+
+        function catchFish(val, fishObj, clientX, clientY, localX, localY) {
+            if(!isPlaying || isPaused) return;
+            fishObj.caught = true;
+            fishObj.el.style.pointerEvents = 'none'; 
+
+            if(val === currentCorrectAnswer) {
+                comboStreak++;
+                playCatchSound(comboStreak); 
+
+                const prevLevel = level;
+                score += 10; 
+                fishCaughtCount++; 
+                if(fishCaughtCount % 5 === 0) {
+                    level++;
+                }
+
+                // Disable other fish during transition
+                fishEntities.forEach(f => { f.caught = true; f.el.style.pointerEvents = 'none'; });
+
+                // Hide caught fish in pond and launch flying clone into bucket
+                fishObj.el.style.transition = 'opacity 0.18s ease, transform 0.2s ease';
+                fishObj.el.style.opacity = '0';
+                animateFishIntoBucket(clientX, clientY, fishObj.palette);
+
+                const praise = praiseWords[Math.floor(Math.random() * praiseWords.length)];
+                const subPraise = comboStreak >= 2 ? `${praise} Combo x${comboStreak}` : praise;
+                createFloatingFeedback(localX, localY, "+10", subPraise, true);
+
+                updateHUD();
+
+                if (level > prevLevel) {
+                    showLevelUpBanner(level);
+                }
+
+                setTimeout(() => { 
+                    if(isPlaying) nextQuestion(); 
+                }, 480);
+            } else { 
+                // Wrong fish tapped
+                fishObj.el.style.transition = 'opacity 0.25s ease';
+                fishObj.el.style.opacity = '0.25';
+                handleMistake(localX, localY, "SALAH IKAN!"); 
+            }
+        }
+
+        function handleMistake(x, y, reasonText = "KURANG TEPAT!") {
+            comboStreak = 0;
+            playWrongSound(); 
+            lives--; 
+            updateHUD();
+
+            createFloatingFeedback(x || pondArea.clientWidth / 2, y || pondArea.clientHeight / 2, "❌ -1 ❤️", reasonText, false);
+
+            // Shake pond & flash red glow
+            pondArea.classList.remove('shake-error');
+            void pondArea.offsetWidth;
+            pondArea.classList.add('shake-error');
+            pondArea.style.boxShadow = 'inset 0 0 65px rgba(239,68,68,0.9), 0 10px 25px rgba(0,0,0,0.4), 0 0 0 4px #fca5a5';
+
+            setTimeout(() => { 
+                pondArea.style.boxShadow = ''; 
+            }, 350);
+
+            if(lives <= 0) { 
+                setTimeout(() => gameOver(), 380); 
+            } else {
+                setTimeout(() => { 
+                    if(isPlaying) nextQuestion(); 
+                }, 450);
+            }
+        }
+
+        function spawnConfetti() {
+            const container = document.getElementById('confetti-container');
+            if (!container) return;
+            container.innerHTML = '';
+            const colors = ['#fbbf24', '#38bdf8', '#f43f5e', '#34d399', '#a855f7', '#ffffff'];
+            for (let i = 0; i < 36; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = (Math.random() * 100) + '%';
+                piece.style.backgroundColor = colors[i % colors.length];
+                piece.style.animationDelay = (Math.random() * 0.8) + 's';
+                piece.style.animationDuration = (2 + Math.random() * 1.2) + 's';
+                container.appendChild(piece);
+            }
+        }
+
+        function gameOver() {
+            isPlaying = false; 
+            stopBGM();
+            if(animationFrameId) cancelAnimationFrame(animationFrameId);
+            
+            lastPlayedScore = score;
+            lastPlayedFish = fishCaughtCount;
+
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-fish').innerText = fishCaughtCount + " Ekor";
+            document.getElementById('final-level').innerText = "Level " + level;
+            document.getElementById('player-summary').innerText = `${pNama} - ${pSekolah} (Kls ${pKelas})`;
+            document.getElementById('game-over-screen').classList.remove('hidden');
+
+            spawnConfetti();
+            playLevelUpSound();
+
+            if(window.simpanSkorGlobal && score > 0) {
+                window.simpanSkorGlobal(pNama, pSekolah, pKelas, score);
+            }
+        }
+
+        function resetToHome() {
+            document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('flex');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('start-screen').classList.remove('hidden');
+        }
+
+        function showLeaderboard() {
+            const lbScreen = document.getElementById('leaderboard-screen');
+            const lbModal = document.getElementById('leaderboard-modal');
+            lbScreen.classList.remove('hidden');
+            
+            setTimeout(() => {
+                lbScreen.classList.remove('opacity-0');
+                if(lbModal) lbModal.classList.remove('scale-95');
+            }, 10);
+
+            const ul = document.getElementById('leaderboard-list');
+            ul.innerHTML = '<li class="text-center text-sky-800 py-10 text-sm font-bold flex flex-col items-center justify-center h-full"><span class="animate-spin text-3xl mb-2">⏳</span>Memuat data peringkat...</li>';
+            
+            const myDeviceId = window.getDeviceId ? window.getDeviceId() : '';
+
+            const banner = document.getElementById('lb-player-banner');
+            if (lastPlayedScore !== null && banner) {
+                document.getElementById('lb-player-name').innerText = `${pNama || 'Pemain'} - ${pSekolah || 'SDN 66 Banda Aceh'} (Kls ${pKelas || '-'})`;
+                document.getElementById('lb-player-score').innerText = lastPlayedScore;
+                document.getElementById('lb-player-fish').innerText = lastPlayedFish + " Ekor";
+                banner.classList.remove('hidden');
+            } else if (banner) {
+                banner.classList.add('hidden');
+            }
+
+            if(window.pantauLeaderboard) {
+                window.pantauLeaderboard((data) => {
+                    if(!data || data.length === 0) { 
+                        ul.innerHTML = '<li class="text-center text-sky-800 py-8 font-bold">Belum ada skor tercatat. Jadilah yang pertama!</li>'; 
+                        return; 
+                    }
+
+                    ul.innerHTML = data.map((item, i) => {
+                        const isMe = (item.device_id === myDeviceId);
+                        const displayName = window.sanitizeName(item.nama);
+                        const displaySekolah = window.sanitizeSekolah(item.sekolah);
+                        const displayKelas = window.sanitizeKelas(item.kelas);
+
+                        let rankStyle = "bg-white/90 border-2 border-sky-200/90 shadow-xs";
+                        let badgeColor = "bg-sky-100 text-sky-900 border-sky-300 font-bold";
+                        let rankIcon = `#${i+1}`;
+                        let titleColor = "text-sky-950 font-bold";
+                        let scoreColor = "text-amber-600";
+
+                        if (i === 0) {
+                            rankStyle = "bg-gradient-to-r from-amber-100 via-yellow-100 to-amber-200 border-2 border-amber-400 shadow-md";
+                            badgeColor = "bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 font-black border-amber-300 shadow-xs";
+                            rankIcon = "👑 1";
+                            titleColor = "text-amber-950 font-black";
+                            scoreColor = "text-amber-600";
+                        } else if (i === 1) {
+                            rankStyle = "bg-gradient-to-r from-slate-100 via-sky-50 to-slate-200 border-2 border-slate-300 shadow-xs";
+                            badgeColor = "bg-gradient-to-r from-slate-300 to-slate-400 text-slate-950 font-black border-slate-200";
+                            rankIcon = "🥈 2";
+                            titleColor = "text-slate-900 font-extrabold";
+                            scoreColor = "text-slate-700";
+                        } else if (i === 2) {
+                            rankStyle = "bg-gradient-to-r from-amber-50 via-orange-100 to-amber-100 border-2 border-amber-300 shadow-xs";
+                            badgeColor = "bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black border-amber-400";
+                            rankIcon = "🥉 3";
+                            titleColor = "text-amber-900 font-extrabold";
+                            scoreColor = "text-amber-700";
+                        }
+
+                        if (isMe) {
+                            rankStyle += " recent-player-highlight ring-4 ring-amber-400 border-amber-500 bg-amber-50/95 z-10 relative";
+                        }
+
+                        return `
+                            <li class="flex justify-between items-center p-3.5 rounded-2xl border transition ${rankStyle}">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="px-2.5 py-1 rounded-xl text-xs font-mono border flex-shrink-0 text-center ${badgeColor}">
+                                        ${rankIcon}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-2">
+                                            <p class="${titleColor} text-sm truncate leading-tight">${displayName}</p>
+                                            ${isMe ? `<span class="bg-gradient-to-r from-amber-400 to-yellow-500 text-slate-950 text-[10px] px-2.5 py-0.5 rounded-full font-black border border-amber-300 badge-pulse flex-shrink-0 shadow-md">✨ SKOR KAMU</span>` : ''}
+                                        </div>
+                                        <p class="text-[11px] text-sky-700 font-semibold truncate mt-0.5">${displaySekolah} (Kls ${displayKelas})</p>
+                                    </div>
+                                </div>
+                                <div class="text-right flex-shrink-0 ml-3">
+                                    <p class="text-xs text-sky-800 uppercase font-black text-[9px]">Skor</p>
+                                    <p class="text-xl title-font ${scoreColor}">${item.skor}</p>
+                                </div>
+                            </li>
+                        `;
+                    }).join('');
+
+                    setTimeout(() => {
+                        const myItem = ul.querySelector('.recent-player-highlight');
+                        if (myItem) {
+                            myItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 150);
+                });
+            }
+        }
+
+        function closeLeaderboard() { 
+            const lbScreen = document.getElementById('leaderboard-screen');
+            const lbModal = document.getElementById('leaderboard-modal');
+            
+            lbScreen.classList.add('opacity-0');
+            if(lbModal) lbModal.classList.add('scale-95');
+            
+            setTimeout(() => {
+                lbScreen.classList.add('hidden');
+            }, 300);
+        }
+    </script>
+</body>
+</html>
+```
