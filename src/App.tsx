@@ -6,7 +6,6 @@ import {
   PerformanceMode,
   FishSpawnItem,
 } from './components/PondCanvas3D';
-import { KOI_PALETTES } from './three/proceduralModels';
 import {
   LeaderboardEntry,
   getDeviceId,
@@ -18,7 +17,7 @@ import {
 } from './services/leaderboardService';
 import { audioEngine } from './services/audioEngine';
 
-type GameScreenState = 'title' | 'playing' | 'paused' | 'gameover';
+type GameScreenState = 'title' | 'tutorial' | 'playing' | 'paused' | 'gameover';
 
 interface FloatingFeedback {
   id: number;
@@ -66,9 +65,9 @@ export default function App() {
   const [lives, setLives] = useState(3);
   const [fishCaught, setFishCaught] = useState(0);
   const [comboStreak, setComboStreak] = useState(0);
+  const [isRareGoldActive, setIsRareGoldActive] = useState(false);
   const [questionText, setQuestionText] = useState('10 × 5');
   const [questionAnimKey, setQuestionAnimKey] = useState(0);
-  const [activeChoices, setActiveChoices] = useState<FishSpawnItem[]>([]);
 
   // 3D Viewport & Multi-Device Controls
   const [cameraPreset, setCameraPreset] = useState<CameraPreset>('angled');
@@ -94,11 +93,16 @@ export default function App() {
 
   // Mutable refs for 60fps simulation loop
   const pondRef = useRef<PondCanvas3DHandle | null>(null);
+  const tutorialPointerRef = useRef<HTMLDivElement | null>(null);
   const timerBarRef = useRef<HTMLDivElement | null>(null);
   const timeRemainingRef = useRef<number>(15);
   const maxTimeRef = useRef<number>(15);
   const currentAnswerRef = useRef<number>(50);
   const isTransitioningRef = useRef<boolean>(false);
+  const hasCompletedTutorialRef = useRef<boolean>(false);
+  const isRareGoldActiveRef = useRef<boolean>(false);
+  const gameStateRef = useRef<GameScreenState>('title');
+  gameStateRef.current = gameState;
 
   const scoreRef = useRef(0);
   const levelRef = useRef(1);
@@ -129,6 +133,7 @@ export default function App() {
   );
 
   // Generate a new Multiplication 1 & 10 Question and spawn 3D Koi Fish
+  // Every 5 consecutive correct answers (comboStreak % 5 === 0), spawns a Rare Golden Koi ('Ikan Koi Emas Langka')!
   const generateNextQuestion = useCallback((targetLevel: number) => {
     isTransitioningRef.current = false;
 
@@ -166,13 +171,18 @@ export default function App() {
     }
     answers.sort(() => Math.random() - 0.5);
 
+    // Spawn 'Ikan Koi Emas Langka' every 5 consecutive correct answers!
+    const isRareRound = comboRef.current > 0 && comboRef.current % 5 === 0;
+    isRareGoldActiveRef.current = isRareRound;
+    setIsRareGoldActive(isRareRound);
+
     const spawnItems: FishSpawnItem[] = answers.map((ans, idx) => ({
       id: Date.now() + idx,
       answer: ans,
       paletteIndex: idx,
+      isRareGold: isRareRound && ans === correctAns,
     }));
 
-    setActiveChoices(spawnItems);
     pondRef.current?.spawnQuestionFish(spawnItems, targetLevel);
   }, []);
 
@@ -200,6 +210,8 @@ export default function App() {
 
       comboRef.current = 0;
       setComboStreak(0);
+      isRareGoldActiveRef.current = false;
+      setIsRareGoldActive(false);
       audioEngine.playWrongSound();
 
       const nextLives = livesRef.current - 1;
@@ -224,26 +236,86 @@ export default function App() {
     [generateNextQuestion, spawnFloatingFeedback, triggerGameOver]
   );
 
-  // Handle 3D Koi Fish Clicked / Tapped
+  // Launch main gameplay round (after tutorial or on subsequent sessions)
+  const beginPlayingRound = useCallback(() => {
+    hasCompletedTutorialRef.current = true;
+    isTransitioningRef.current = false;
+    isRareGoldActiveRef.current = false;
+    setIsRareGoldActive(false);
+    setGameState('playing');
+    gameStateRef.current = 'playing';
+    pondRef.current?.triggerBucketCelebration(0);
+    window.setTimeout(() => {
+      generateNextQuestion(1);
+    }, 50);
+  }, [generateNextQuestion]);
+
+  // Handle 3D Koi Fish Clicked / Tapped (Tutorial & Main Gameplay)
   const handleFishClicked = useCallback(
     (
       answer: number,
       screenX: number,
       screenY: number,
-      _fishIndex: number
-    ): boolean => {
-      if (isTransitioningRef.current) return false;
+      _fishIndex: number,
+      isRareGold?: boolean
+    ): number => {
+      if (isTransitioningRef.current) return 0;
+
+      // Interactive First-Session Tutorial Mode
+      if (gameStateRef.current === 'tutorial') {
+        if (answer === currentAnswerRef.current) {
+          isTransitioningRef.current = true;
+          hasCompletedTutorialRef.current = true;
+
+          audioEngine.playCatchSound(3);
+          audioEngine.playLevelUpSound();
+          pondRef.current?.triggerBucketCelebration(1, 4, false);
+
+          spawnFloatingFeedback(
+            screenX,
+            screenY,
+            'PINTAR!',
+            '★ Tutorial Selesai! Mulai Bermain! ★',
+            true
+          );
+
+          window.setTimeout(() => {
+            beginPlayingRound();
+          }, 850);
+
+          return 4;
+        } else {
+          // Gentle guidance without losing any lives
+          audioEngine.playWrongSound();
+          spawnFloatingFeedback(
+            screenX,
+            screenY,
+            'COBA LAGI!',
+            'Sentuh Ikan Emas Berangka 10!',
+            false
+          );
+          return 0;
+        }
+      }
 
       if (answer === currentAnswerRef.current) {
         isTransitioningRef.current = true;
+
+        const caughtRareGold = Boolean(
+          isRareGold || isRareGoldActiveRef.current
+        );
+        const pointsEarned = caughtRareGold ? 20 : 10;
 
         const nextCombo = comboRef.current + 1;
         comboRef.current = nextCombo;
         setComboStreak(nextCombo);
 
-        audioEngine.playCatchSound(nextCombo);
+        audioEngine.playCatchSound(caughtRareGold ? nextCombo + 3 : nextCombo);
+        if (caughtRareGold) {
+          audioEngine.playLevelUpSound();
+        }
 
-        const nextScore = scoreRef.current + 10;
+        const nextScore = scoreRef.current + pointsEarned;
         scoreRef.current = nextScore;
         setScore(nextScore);
 
@@ -261,25 +333,35 @@ export default function App() {
           window.setTimeout(() => setLevelUpBanner(null), 1400);
         }
 
-        pondRef.current?.triggerBucketCelebration(nextFish);
+        pondRef.current?.triggerBucketCelebration(
+          nextFish,
+          nextCombo,
+          caughtRareGold
+        );
 
         const praise =
           PRAISE_WORDS[Math.floor(Math.random() * PRAISE_WORDS.length)];
-        const subText =
-          nextCombo >= 2 ? `${praise} Combo x${nextCombo}` : praise;
-        spawnFloatingFeedback(screenX, screenY, '+10', subText, true);
+        const mainPopup = caughtRareGold ? '+20 (2X!)' : '+10';
+        const subText = caughtRareGold
+          ? `★ IKAN KOI EMAS LANGKA! SKOR GANDA! ★`
+          : nextCombo >= 3
+          ? `★ ${praise} Combo x${nextCombo}! ★`
+          : nextCombo >= 2
+          ? `${praise} Combo x${nextCombo}`
+          : praise;
+        spawnFloatingFeedback(screenX, screenY, mainPopup, subText, true);
 
         window.setTimeout(() => {
           generateNextQuestion(nextLevel);
         }, 480);
 
-        return true;
+        return nextCombo;
       } else {
         handleMistake(screenX, screenY, 'SALAH IKAN!');
-        return false;
+        return 0;
       }
     },
-    [generateNextQuestion, handleMistake, spawnFloatingFeedback]
+    [beginPlayingRound, generateNextQuestion, handleMistake, spawnFloatingFeedback]
   );
 
   // Per-frame Timer Update without React Re-renders
@@ -302,7 +384,7 @@ export default function App() {
     [handleMistake]
   );
 
-  // Start Game Validation & Initialization
+  // Start Game Validation & Initialization (Launches Interactive Tutorial on First Session)
   const handleStartGame = useCallback(() => {
     if (!namaInput.trim() || !kelasInput.trim()) {
       setFormError(true);
@@ -325,22 +407,37 @@ export default function App() {
     livesRef.current = 3;
     fishCaughtRef.current = 0;
     comboRef.current = 0;
+    isRareGoldActiveRef.current = false;
 
     setScore(0);
     setLevel(1);
     setLives(3);
     setFishCaught(0);
     setComboStreak(0);
-    setGameState('playing');
+    setIsRareGoldActive(false);
 
     audioEngine.init();
     audioEngine.startBGM();
     pondRef.current?.triggerBucketCelebration(0);
 
-    window.setTimeout(() => {
-      generateNextQuestion(1);
-    }, 50);
-  }, [generateNextQuestion, kelasInput, namaInput, sekolahInput]);
+    if (!hasCompletedTutorialRef.current) {
+      // First Session: Launch short interactive tutorial with Special Golden Koi & Arrow Instruction
+      isTransitioningRef.current = false;
+      currentAnswerRef.current = 10;
+      setQuestionText('10 × 1');
+      setQuestionAnimKey((k) => k + 1);
+      setGameState('tutorial');
+      gameStateRef.current = 'tutorial';
+      if (timerBarRef.current) {
+        timerBarRef.current.style.transform = 'scaleX(1)';
+      }
+      window.setTimeout(() => {
+        pondRef.current?.spawnTutorialFish();
+      }, 60);
+    } else {
+      beginPlayingRound();
+    }
+  }, [beginPlayingRound, kelasInput, namaInput, sekolahInput]);
 
   // Toggle Pause
   const handleTogglePause = useCallback(() => {
@@ -436,9 +533,49 @@ export default function App() {
         gameState={gameState}
         cameraPreset={cameraPreset}
         performanceMode={performanceMode}
+        tutorialPointerRef={tutorialPointerRef}
         onFishClicked={handleFishClicked}
         onTimeTick={handleTimeTick}
       />
+
+      {/* 1B. Real-Time Tracking Arrow Instruction Callout above the Special Tutorial Koi */}
+      {gameState === 'tutorial' && (
+        <div
+          ref={tutorialPointerRef}
+          style={{
+            left: 0,
+            top: 0,
+            opacity: 0,
+            transform: 'translate3d(-999px, -999px, 0)',
+            willChange: 'transform, opacity',
+          }}
+          className="fixed z-25 pointer-events-none transition-opacity duration-150"
+        >
+          <div className="-translate-x-1/2 -translate-y-full pb-2 flex flex-col items-center">
+            <div className="bg-amber-400 text-slate-950 border-[3px] border-white rounded-2xl px-3.5 py-1.5 shadow-2xl text-center whitespace-nowrap animate-bounce">
+              <div className="text-[10px] font-extrabold uppercase tracking-wider text-amber-950 leading-tight">
+                TUTORIAL · 10 × 1 = 10
+              </div>
+              <div className="title-font text-sm sm:text-base text-slate-950 leading-tight">
+                SENTUH IKAN INI!
+              </div>
+            </div>
+            {/* Bold Animated Pointer Arrow Pointing Down to the Special Golden Koi */}
+            <svg
+              className="w-8 h-8 sm:w-9 sm:h-9 text-amber-400 drop-shadow-[0_3px_2px_rgba(0,0,0,0.65)] -mt-1 animate-bounce"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+            >
+              <path
+                stroke="#ffffff"
+                strokeWidth="1.5"
+                strokeLinejoin="round"
+                d="M12 21l-7-8h4.5V3h5v10H19l-7 8z"
+              />
+            </svg>
+          </div>
+        </div>
+      )}
 
       {/* 2. Floating Score / Combo Popups in Screen Space */}
       <div className="fixed inset-0 pointer-events-none z-30 overflow-hidden">
@@ -655,17 +792,20 @@ export default function App() {
 
             {/* Flat Control Hint Line */}
             <p className="mt-3.5 text-[11px] text-sky-300/90 font-medium">
-              Sentuh Ikan 3D / Tombol Jawaban · Angka 1–6 · Esc Jeda
+              Sentuh Langsung Ikan 3D yang Membawa Jawaban · Esc Jeda
             </p>
           </div>
         </div>
       )}
 
-      {/* ================= PLAYING HUD (RESPONSIVE FOR HP, TABLET, PID & LAPTOP) ================= */}
-      {(gameState === 'playing' || gameState === 'paused') && (
+      {/* ================= PLAYING & TUTORIAL HUD (RESPONSIVE FOR HP, TABLET, PID & LAPTOP) ================= */}
+      {(gameState === 'tutorial' ||
+        gameState === 'playing' ||
+        gameState === 'paused') && (
         <div className="fixed inset-0 z-20 pointer-events-none flex flex-col justify-between p-2 sm:p-3.5 md:p-5">
           {/* Top Perimeter Status Cluster */}
-          <div className="flex items-center justify-between gap-1.5 sm:gap-2 w-full max-w-6xl mx-auto">
+          <div className="flex flex-col gap-2 w-full max-w-6xl mx-auto">
+            <div className="flex items-center justify-between gap-1.5 sm:gap-2 w-full">
             {/* Left Cluster: Level, Score & Combo */}
             <div className="pointer-events-auto bg-sky-950/92 border border-sky-400/60 rounded-2xl px-3 sm:px-4 py-1.5 sm:py-2 flex items-center gap-2.5 sm:gap-4 text-white shadow-lg">
               <div>
@@ -688,10 +828,16 @@ export default function App() {
                 </span>
               </div>
 
-              {comboStreak >= 2 && (
+              {comboStreak >= 1 && (
                 <>
                   <div className="w-px h-6 bg-sky-700 hidden sm:block" />
-                  <div className="text-[11px] sm:text-xs font-extrabold text-amber-300 mono-num whitespace-nowrap">
+                  <div
+                    className={`text-[11px] sm:text-xs font-extrabold mono-num whitespace-nowrap ${
+                      isRareGoldActive
+                        ? 'text-yellow-300 animate-pulse'
+                        : 'text-amber-300'
+                    }`}
+                  >
                     x{comboStreak}
                   </div>
                 </>
@@ -824,22 +970,53 @@ export default function App() {
                 </svg>
               </button>
             </div>
+            </div>
+
+            {/* Interactive First-Session Tutorial Banner at Top */}
+            {gameState === 'tutorial' && (
+              <div className="pointer-events-auto w-full max-w-xl mx-auto bg-amber-400/95 text-slate-950 border-2 border-white rounded-2xl px-3.5 py-2 shadow-xl flex items-center justify-between gap-2.5 animate-pop-in">
+                <div className="text-left">
+                  <span className="block text-[10px] font-extrabold uppercase tracking-wider text-amber-950">
+                    LATIHAN CARA BERMAIN (SESI PERTAMA)
+                  </span>
+                  <p className="text-xs sm:text-sm font-extrabold leading-snug">
+                    Soal di bawah adalah <span className="underline">10 × 1 = 10</span>. Sentuh Ikan Emas berangka <span className="bg-white px-1.5 py-0.5 rounded-md">10</span> yang ditunjuk panah!
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={beginPlayingRound}
+                  className="bg-sky-950 hover:bg-sky-900 text-amber-300 text-xs font-extrabold px-3 py-1.5 rounded-xl shrink-0 shadow transition active:scale-95 cursor-pointer whitespace-nowrap"
+                >
+                  Lewati ▸
+                </button>
+              </div>
+            )}
+
+            {/* Rare Golden Koi ('Ikan Koi Emas Langka') Banner every 5 Consecutive Correct Answers */}
+            {gameState === 'playing' && isRareGoldActive && (
+              <div className="pointer-events-auto w-full max-w-lg mx-auto bg-gradient-to-r from-amber-300 via-yellow-200 to-amber-400 text-slate-950 border-2 border-white rounded-2xl px-3.5 py-1.5 shadow-xl text-center animate-pop-in">
+                <p className="text-xs sm:text-sm font-extrabold tracking-wide">
+                  ★ IKAN KOI EMAS LANGKA MUNCUL! Tangkap untuk Skor Ganda (+20)! ★
+                </p>
+              </div>
+            )}
           </div>
 
-          {/* Unified Collapsible Bottom Control Dock */}
-          <div className="pointer-events-auto w-full max-w-4xl mx-auto flex flex-col items-center">
+          {/* Raised Bottom Question Panel (Elevated above mobile/PID bottom navigation bar, no answer buttons) */}
+          <div className="pointer-events-auto w-full max-w-xl mx-auto flex flex-col items-center mb-6 sm:mb-8 md:mb-10">
             <button
               type="button"
               onClick={() => setDockCollapsed((c) => !c)}
               className="bg-sky-950/92 hover:bg-sky-900 text-sky-200 border border-b-0 border-sky-400/60 px-4 py-1 rounded-t-xl text-[11px] font-bold transition cursor-pointer whitespace-nowrap"
             >
               {dockCollapsed
-                ? '▴ Tampilkan Panel Soal & Tombol Cepat'
-                : '▾ Sembunyikan Panel'}
+                ? '▴ Tampilkan Panel Soal Perkalian'
+                : '▾ Sembunyikan Panel Soal'}
             </button>
 
             {!dockCollapsed && (
-              <div className="w-full bg-sky-950/94 border-2 border-sky-400/70 rounded-2xl p-2.5 sm:p-3.5 shadow-2xl text-white relative overflow-hidden">
+              <div className="w-full bg-sky-950/94 border-2 border-sky-400/70 rounded-2xl px-3.5 py-2.5 sm:px-5 sm:py-3 shadow-2xl text-white relative overflow-hidden">
                 {/* Smooth Timer Progress Bar */}
                 <div className="absolute top-0 left-0 right-0 h-1.5 sm:h-2 bg-sky-900 overflow-hidden">
                   <div
@@ -848,12 +1025,12 @@ export default function App() {
                   />
                 </div>
 
-                <div className="flex flex-col md:flex-row items-center justify-between gap-2.5 pt-1">
+                <div className="flex items-center justify-between gap-3 pt-1">
                   {/* Left: Active Multiplication Prompt */}
-                  <div className="flex items-center justify-between md:justify-start w-full md:w-auto gap-3 px-1">
+                  <div className="flex items-center gap-3">
                     <div>
                       <span className="block text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-sky-300">
-                        Tangkap Ikan Hasil Dari:
+                        Sentuh Ikan 3D Hasil Dari:
                       </span>
                       <div
                         key={questionAnimKey}
@@ -862,9 +1039,11 @@ export default function App() {
                         {questionText} = ?
                       </div>
                     </div>
+                  </div>
 
-                    {/* Caught Fish Counter on Mobile next to Question */}
-                    <div className="bg-sky-900/90 border border-sky-600/70 rounded-xl px-3 py-1 text-center shrink-0">
+                  {/* Right: Caught Fish Counter & Camera Angle Switcher */}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <div className="bg-sky-900/90 border border-sky-600/70 rounded-xl px-3 py-1 text-center">
                       <span className="block text-[9px] font-bold text-sky-300 uppercase">
                         Tangkapan
                       </span>
@@ -872,64 +1051,33 @@ export default function App() {
                         {fishCaught} Ikan
                       </span>
                     </div>
-                  </div>
 
-                  {/* Center: Quick-Tap Answer Buttons for Ergonomic HP Thumb & Classroom PID Reach */}
-                  <div
-                    className="flex items-center justify-center gap-1.5 sm:gap-2 flex-wrap"
-                    role="group"
-                    aria-label="Pilihan Jawaban Cepat"
-                  >
-                    {activeChoices.map((choice, idx) => {
-                      const palette =
-                        KOI_PALETTES[choice.paletteIndex % KOI_PALETTES.length];
-                      return (
+                    <div
+                      className="hidden sm:flex items-center gap-1 bg-sky-900/90 p-1 rounded-xl border border-sky-700"
+                      role="group"
+                      aria-label="Sudut Kamera 3D"
+                    >
+                      {(
+                        [
+                          { id: 'angled', label: '3D' },
+                          { id: 'top', label: 'Atas' },
+                          { id: 'closeup', label: 'Dekat' },
+                        ] as const
+                      ).map((cam) => (
                         <button
-                          key={choice.id}
+                          key={cam.id}
                           type="button"
-                          onClick={() =>
-                            pondRef.current?.triggerCatchByIndex(idx)
-                          }
-                          style={{ borderColor: palette.border }}
-                          className="min-w-[52px] sm:min-w-[60px] bg-white hover:bg-amber-50 active:scale-90 text-slate-950 border-[3px] rounded-xl px-2.5 py-1.5 shadow-md transition flex flex-col items-center justify-center cursor-pointer"
+                          onClick={() => setCameraPreset(cam.id)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap ${
+                            cameraPreset === cam.id
+                              ? 'bg-amber-400 text-slate-950 shadow-sm'
+                              : 'text-sky-200 hover:text-white'
+                          }`}
                         >
-                          <span className="title-font text-base sm:text-lg mono-num leading-none">
-                            {choice.answer}
-                          </span>
-                          <span className="text-[9px] font-bold text-slate-500 leading-none mt-0.5">
-                            Ikan #{idx + 1}
-                          </span>
+                          {cam.label}
                         </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Right: Camera Angle Switcher */}
-                  <div
-                    className="hidden sm:flex items-center gap-1 bg-sky-900/90 p-1 rounded-xl border border-sky-700 shrink-0"
-                    role="group"
-                    aria-label="Sudut Kamera 3D"
-                  >
-                    {(
-                      [
-                        { id: 'angled', label: '3D' },
-                        { id: 'top', label: 'Atas' },
-                        { id: 'closeup', label: 'Dekat' },
-                      ] as const
-                    ).map((cam) => (
-                      <button
-                        key={cam.id}
-                        type="button"
-                        onClick={() => setCameraPreset(cam.id)}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer whitespace-nowrap ${
-                          cameraPreset === cam.id
-                            ? 'bg-amber-400 text-slate-950 shadow-sm'
-                            : 'text-sky-200 hover:text-white'
-                        }`}
-                      >
-                        {cam.label}
-                      </button>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
