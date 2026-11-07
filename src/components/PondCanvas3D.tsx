@@ -76,6 +76,8 @@ interface ActiveKoiEntity {
   isTutorialTarget?: boolean;
   isRareGold?: boolean;
   sparkleTimer?: number;
+  hasSurfaced?: boolean;
+  surfaceSkimCooldown?: number;
 }
 
 interface FlyingFishArc {
@@ -391,6 +393,11 @@ export const PondCanvas3D = forwardRef<PondCanvas3DHandle, PondCanvas3DProps>(
         sunLight.castShadow = !isLite;
       }
     }, [performanceMode]);
+
+    const getStereoPan = (worldX: number): number => {
+      const maxHalfW = Math.max(swimBoundsRef.current.rx, 2.5);
+      return THREE.MathUtils.clamp(worldX / maxHalfW, -0.82, 0.82);
+    };
 
     const triggerSurfaceWaveImpulse = (x: number, z: number, strength = 1.0) => {
       const idx = nextRippleSlotRef.current % MAX_SHADER_RIPPLES;
@@ -874,6 +881,8 @@ export const PondCanvas3D = forwardRef<PondCanvas3DHandle, PondCanvas3DProps>(
           jumpCooldown: 99,
           caught: false,
           isTutorialTarget: true,
+          hasSurfaced: false,
+          surfaceSkimCooldown: 2.2,
         };
         targetModel.hitbox.userData.koiEntity = targetEntity;
         activeKoiRef.current.push(targetEntity);
@@ -915,6 +924,8 @@ export const PondCanvas3D = forwardRef<PondCanvas3DHandle, PondCanvas3DProps>(
           jumpCooldown: 99,
           caught: false,
           isTutorialTarget: false,
+          hasSurfaced: false,
+          surfaceSkimCooldown: 3.1,
         };
         otherModel.hitbox.userData.koiEntity = otherEntity;
         activeKoiRef.current.push(otherEntity);
@@ -1040,6 +1051,8 @@ export const PondCanvas3D = forwardRef<PondCanvas3DHandle, PondCanvas3DProps>(
             caught: false,
             isRareGold: isRare,
             sparkleTimer: 0,
+            hasSurfaced: false,
+            surfaceSkimCooldown: 1.8 + idx * 0.9 + Math.random() * 1.8,
           };
 
           model.hitbox.userData.koiEntity = entity;
@@ -1705,7 +1718,7 @@ export const PondCanvas3D = forwardRef<PondCanvas3DHandle, PondCanvas3DProps>(
           spawn3DWaterRipple(clampedX, clampedZ, 'touch');
           spawn3DSplashDroplets(clampedX, clampedZ, 5);
           trigger3DNetScoop(clampedX, clampedZ);
-          audioEngine.playWaterRippleSound();
+          audioEngine.playWaterRippleSound(getStereoPan(clampedX));
         }
       };
 
@@ -1896,6 +1909,20 @@ export const PondCanvas3D = forwardRef<PondCanvas3DHandle, PondCanvas3DProps>(
               koi.model.root.scale.setScalar(
                 koi.targetScale * (0.25 + 0.75 * easeOut)
               );
+              // Trigger soft splash sound as the Koi swims up from deep water and reaches the surface
+              if (!koi.hasSurfaced && koi.spawnElapsed >= 0.24) {
+                koi.hasSurfaced = true;
+                spawn3DSplashDroplets(koi.x, koi.z, 3);
+                if (
+                  gameStateRef.current === 'playing' ||
+                  gameStateRef.current === 'tutorial'
+                ) {
+                  audioEngine.playSoftSplashSound(
+                    'surface',
+                    getStereoPan(koi.x)
+                  );
+                }
+              }
             } else {
               koi.model.root.scale.setScalar(koi.targetScale);
             }
@@ -1966,14 +1993,18 @@ export const PondCanvas3D = forwardRef<PondCanvas3DHandle, PondCanvas3DProps>(
             koi.x = THREE.MathUtils.clamp(koi.x, -boundX, boundX);
             koi.z = THREE.MathUtils.clamp(koi.z, zMin, zMax);
 
-            // Periodic 3D Leaping out of the water
+            // Periodic 3D Leaping out of the water & re-entering the water with varied soft splashes
             koi.jumpCooldown -= dt;
             if (koi.jumpCooldown <= 0 && !koi.isJumping) {
               koi.isJumping = true;
               koi.jumpTime = 0;
               spawn3DWaterRipple(koi.x, koi.z, 'touch');
-              if (gameStateRef.current === 'playing') {
-                audioEngine.playFishJumpSound();
+              spawn3DSplashDroplets(koi.x, koi.z, 3);
+              if (
+                gameStateRef.current === 'playing' ||
+                gameStateRef.current === 'tutorial'
+              ) {
+                audioEngine.playSoftSplashSound('breach', getStereoPan(koi.x));
               }
             }
 
@@ -1987,11 +2018,39 @@ export const PondCanvas3D = forwardRef<PondCanvas3DHandle, PondCanvas3DProps>(
                 koi.jumpCooldown = koi.isRareGold
                   ? 2.8 + Math.random() * 3.0
                   : 4.2 + Math.random() * 5.5;
+                // Koi re-enters the water (masuk kembali ke dalam air)
                 spawn3DWaterRipple(koi.x, koi.z, 'touch');
+                spawn3DSplashDroplets(koi.x, koi.z, 5);
+                if (
+                  gameStateRef.current === 'playing' ||
+                  gameStateRef.current === 'tutorial'
+                ) {
+                  audioEngine.playSoftSplashSound(
+                    'reentry',
+                    getStereoPan(koi.x)
+                  );
+                }
               } else {
                 const sinArc = Math.sin(jp * Math.PI);
                 jumpHeight = sinArc * 1.25;
                 jumpPitch = Math.cos(jp * Math.PI) * 0.5;
+              }
+            } else if (koi.spawnElapsed >= 0.45) {
+              // Periodic gentle surface tail-flick / surface skim while swimming near the surface
+              koi.surfaceSkimCooldown =
+                (koi.surfaceSkimCooldown ?? 3.0) - dt;
+              if (koi.surfaceSkimCooldown <= 0) {
+                koi.surfaceSkimCooldown = 2.8 + Math.random() * 3.4;
+                spawn3DWaterRipple(koi.x, koi.z, 'touch');
+                if (
+                  gameStateRef.current === 'playing' ||
+                  gameStateRef.current === 'tutorial'
+                ) {
+                  audioEngine.playSoftSplashSound(
+                    'skim',
+                    getStereoPan(koi.x)
+                  );
+                }
               }
             }
 
@@ -2099,6 +2158,10 @@ export const PondCanvas3D = forwardRef<PondCanvas3DHandle, PondCanvas3DProps>(
             effectsGroup.remove(arc.group);
             flyingFishRef.current.splice(i, 1);
             spawn3DSplashDroplets(arc.endPos.x, arc.endPos.z, 6);
+            audioEngine.playSoftSplashSound(
+              'reentry',
+              getStereoPan(arc.endPos.x)
+            );
           }
         }
 
